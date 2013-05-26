@@ -1,0 +1,9 @@
+{% if latest_invoice_list %}
+    <ul>
+    {% for invoice in latest_invoice_list %}
+        <li><a href="/invoice/{{ invoice.pk }}/">{{ invoice.customer }} - {{ invoice.invoice_date | date }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No invoices are available. You should <a href="/invoice/add">create one</a></p>
+{% endif %}

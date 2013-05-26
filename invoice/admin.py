@@ -7,11 +7,13 @@ class LineItemInvoice(admin.TabularInline):
 	extra = 3
 
 class InvoiceAdmin(admin.ModelAdmin):
-	list_display = ('customer', 'invoice_date', 'taxable_total', 'grand_total')
+	readonly_fields = ('invoice_date',)
+	list_display = ('pk', 'customer', 'invoice_date', '_is_paid', 'grand_total')
 	fieldsets = [
-		(None,       {'fields': ['customer']}
+		(None,       {'fields': ['customer', 'invoice_date', 'paid_date']}
 		)
 	]
 	inlines = [LineItemInvoice]
+	date_heirarchy = 'invoice_date'
 
 admin.site.register(Invoice, InvoiceAdmin)
