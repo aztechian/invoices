@@ -41,3 +41,5 @@ class Invoice(models.Model):
 	_is_paid.admin_order_field = 'paid_date'
 	_is_paid.boolean = True
 	_is_paid.short_description = 'Paid?'
+
+	is_paid = property(_is_paid)

@@ -1,0 +1,24 @@
+
+/*css for invoice views*/
+.recipient, .totalbox {
+  text-align: right;
+}
+
+.invoice-id {
+  padding: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  border: solid 1px;
+  margin: 10px 0px 10px 10px;
+}
+
+#invoice-body {
+	border-left: solid lightgrey 1px;
+	border-top: solid lightgrey 1px;
+	padding: 4px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+
+	box-shadow: 3px 3px 3px #CCC;
+}
