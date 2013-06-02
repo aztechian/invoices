@@ -6,4 +6,5 @@ urlpatterns = patterns(r'^$',
 	url(r'^(?P<pk>\d+)/$', views.DetailView.as_view(), name='detail'),
 	url(r'^add/$', views.add, name='add'),
 	url(r'^list/$', views.list, name='list'),
+	url(r'^search/$', views.search, name='search'),
 )

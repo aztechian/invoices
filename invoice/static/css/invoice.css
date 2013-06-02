@@ -1,24 +1,140 @@
 
 /*css for invoice views*/
 .recipient, .totalbox {
-  text-align: right;
+	text-align: right;
 }
 
 .invoice-id {
-  padding: 10px;
-  font-size: 24px;
-  font-weight: bold;
-  border: solid 1px;
-  margin: 10px 0px 10px 10px;
+	padding: 10px;
+	font-size: 24px;
+	font-weight: bold;
+	border: solid 1px;
+	margin: 10px 0px 10px 10px;
 }
 
-#invoice-body {
+.currency:before {
+    content: '$';
+}
+
+tbody td {
+    height: 30px;
+}
+div.invoice-body {
 	border-left: solid lightgrey 1px;
 	border-top: solid lightgrey 1px;
 	padding: 4px;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
 	border-radius: 10px;
-
+    margin: 10px;
 	box-shadow: 3px 3px 3px #CCC;
 }
+
+header {
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+header h3 {
+    display: inline;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.status {
+    font-size: 2em;
+    /*border-radius: 0 0.2rem 0.2rem 0;*/
+    padding: 0 1rem 0 0.5rem;
+    color: white;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+    position: relative;
+}
+
+.status:before, .status:after {
+    content: "";
+    height: 50%;
+    width: 1em;
+    position: absolute;
+    left: -0.8em; 
+}
+
+.status:before {
+    top: 0; 
+}
+
+.status:after {
+    bottom: 0;
+}
+
+.status i {
+    font-size: 0.3em;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    font-weight: normal;
+}
+.status i b {
+    font-size: 1.5em; 
+}
+.status.problem {
+    background: #d92626;
+    box-shadow: -4px 0px 4px #c32222 inset;
+    border-right-color: #a51d1d;
+}
+
+.status.problem:before {
+    background: -webkit-linear-gradient(34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: -moz-linear-gradient(34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: -o-linear-gradient(34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: linear-gradient(34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: linear-gradient(56deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+}
+.status.problem:after {
+    background: -webkit-linear-gradient(-34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: -moz-linear-gradient(-34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: -o-linear-gradient(-34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: linear-gradient(-34deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+    background: linear-gradient(124deg, rgba(217, 38, 38, 0), rgba(217, 38, 38, 0) 50%, #c32222 53%, #d92626 56%);
+}
+
+.status.complete {
+    background: #60ac39;
+    box-shadow: -4px 0px 4px #559933 inset;
+    border-right-color: #467e2a;
+}
+.status.complete:before:not(:first-child) {
+    background: -webkit-linear-gradient(34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: -moz-linear-gradient(34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: -o-linear-gradient(34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: linear-gradient(34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: linear-gradient(56deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+}
+.status.complete:after:not(:first-child) {
+    background: -webkit-linear-gradient(-34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: -moz-linear-gradient(-34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: -o-linear-gradient(-34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: linear-gradient(-34deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+    background: linear-gradient(124deg, rgba(96, 172, 57, 0), rgba(96, 172, 57, 0) 50%, #559933 53%, #60ac39 56%);
+}
+
+
+.status.inprocess {
+    background: #b4cad0;
+    box-shadow: -4px 0px 4px #95b4bc inset;
+    border-right-color: #94B4BC;
+}
+.status.inprocess:before {
+    background: -webkit-linear-gradient(34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: -moz-linear-gradient(34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: -o-linear-gradient(34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: linear-gradient(34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: linear-gradient(56deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+}
+.status.inprocess:after {
+    background: -webkit-linear-gradient(-34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: -moz-linear-gradient(-34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: -o-linear-gradient(-34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: linear-gradient(-34deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+    background: linear-gradient(124deg, rgba(180, 202, 208, 0), rgba(180, 202, 208, 0) 50%, #95b4bc 53%, #b4cad0 56%);
+}
+

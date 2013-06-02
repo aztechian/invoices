@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href={% static 'css/bootstrap-responsive.min.css' %}>
 
     <!-- bootstrap x-editable -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.4.4/bootstrap-editable/css/bootstrap-editable.css">
+    <link rel="stylesheet" type="text/css" href={% static 'css/bootstrap-editable.css' %}>
 
     <script type="text/javascript" src={% static 'js/jquery-1.10.0.min.js' %}></script>
 </head>
@@ -37,8 +37,9 @@
             </li>
         </ul>
     </div>
-    <form class="navbar-search pull-right">
-        <input type="text" class="search-query" placeholder="Search..."> 
+    <form class="navbar-search pull-right" action="/invoice/search/" method="GET">
+        {% csrf_token %}
+        <input type="text" class="search-query" placeholder="Search..." name="q"> 
     </form>
 </div>
 </div>
@@ -80,7 +81,7 @@
 </thead>
 <tbody>
     {% for invoice in latest_invoice_list %}
-    <tr id={{ invoice.pk>
+    <tr id={{ invoice.pk }}>
         <td id=id_{{ invoice.pk }}>{{ invoice.pk }}</td>
         <td>{{ invoice.customer }}</td>
         <td>${{ invoice.grand_total }}</td>
@@ -111,7 +112,7 @@
 
 <!-- JS Here -->
 <script type="text/javascript" src={% static 'js/bootstrap.min.js' %}></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.4.4/bootstrap-editable/js/bootstrap-editable.min.js"></script>
+<script type="text/javascript" src={% static 'js/bootstrap-editable.min.js' %}></script>
 <script type="text/javascript">
 $(document).on('click', 'tbody tr', function(){
     pk = $(this).attr('id')
