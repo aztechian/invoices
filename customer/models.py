@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django_localflavor_us.us_states import STATE_CHOICES
-# from django.contrib.localflavor.us.us_states import STATE_CHOICES
-
-# Create your models here.
 
 class Customer(User):
 	#inheriting all fields from auth.User too

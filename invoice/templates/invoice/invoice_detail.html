@@ -25,13 +25,13 @@
         <div class="navbar-content">
           <ul class="nav">
             <li class="active">
-              <a href="/invoice/">Home</a> 
+              <a href="/invoices/">Home</a> 
             </li>
             <li>
-              <a href="/invoice/">Invoices</a> 
+              <a href="/invoices/">Invoices</a> 
             </li>
             <li>
-              <a href="/customer/">Customers</a> 
+              <a href="/customers/">Customers</a> 
             </li>
             <li>
               <a href="#">About</a> 
@@ -53,10 +53,10 @@
       <div class="span2">
         <ul class="nav  nav-pills nav-stacked">
           <li class="active">
-            <a href="#">Invoices</a> 
+            <a href="/invoices/">Invoices</a> 
           </li>
           <li>
-            <a href="#">Customers</a> 
+            <a href="/customers/">Customers</a> 
           </li>
         </ul>
         <div class="well">
@@ -148,16 +148,51 @@
     $().ready(function(){
       $("#lineitem-list a").editable();
 
-      newrow = $("#lineitem-template").clone();
-      $newrow = $(newrow);
-      $newrow.attr('id', 'newlineitem').css('background', '#F7F7C8');
-      currRowCount = $('#lineitem-list tbody')[0].rows.length;
+      var newrow = $("#lineitem-template").clone();
+      var $newrow = $(newrow);
+      $newrow.attr('id', 'newlineitem').css('background', '#FAFAE6');
+      var currRowCount = $('#lineitem-list tbody')[0].rows.length;
       $newrow.children('td:first').html(currRowCount); //it already be +1 because of the template row
       $('#lineitem-list tbody').append(newrow);
-      $(newrow).find('a').editable();
-      $(newrow).show(1750, function(){
-        $(newrow).filter('tr').css('background', '');
+      // $(newrow).find('a').editable();
+      // $(newrow).show(1750, function(){
+      //   $(newrow).filter('tr').css('background', '');
+      $newrow.find('a').editable();
+      $newrow.show('slow', function(){
+        $newrow.css('background', '');
       });
+
+      // $('.recipient').editable({
+      //   value: {
+      //     full_name: 'Customer One',
+      //     address1: '1234 Main St',
+      //     address2: '',
+      //     city: 'Anytown',
+      //     state: 'NE',
+      //     zip: '62932'
+      //   },
+      //   validate: function(value){
+      //     if( value.address1 === '' )
+      //       return 'Address is required';
+      //     if( value.city === '' )
+      //       return 'City is required';
+      //     if( value.state === '' )
+      //       return 'State is required';
+      //     if( value.zip === '' )
+      //       return 'Zip code is required';
+      //     if( ! /(^\d{5}$)|(^\d{5}-\d{4}$)/.test(value.zip) )
+      //       return 'Zip code in invalid format';
+      //   },
+      //   display: function(value){
+      //     if( !value ){
+      //       $(this).empty();
+      //       return;
+      //     }
+      //     var thehtml = '<p>' + value.full_name + "<br>" + value.address1 + "<br>" + value.address2 + "<br>" + value.city + ", " + value.state + " " + value.zip + "</p>";
+      //     $(this).html(thehtml);
+      //   }
+      // });
+      // });
     });
 
     // $("#lineitem-list a").on('save', function(e, params){
@@ -170,7 +205,7 @@
     //   console.log("Calling " + method + " on line item " + lineitem_id)
     // })
 
-    $('#lineitem-list .editable').on('hidden', function(e, reason){
+    $(document).on('hidden', '#lineitem-list a', function(e, reason){
         console.log("Editable hidden");
         if(reason === 'save' || reason === 'nochange') {
             var $next = $(this).closest('tr').next().find('.editable');

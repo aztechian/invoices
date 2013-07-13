@@ -6,3 +6,6 @@ local_settings.py
 *.db
 .DS_Store
 .Spotlight*
+
+.c9*
+*env/

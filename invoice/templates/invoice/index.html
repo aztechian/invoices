@@ -24,10 +24,10 @@
                 <a href="#">Home</a> 
             </li>
             <li>
-                <a href="list/">Invoices</a> 
+                <a href="/invoices/">Invoices</a> 
             </li>
             <li>
-                <a href="/customer/">Customers</a> 
+                <a href="/customers/">Customers</a> 
             </li>
             <li>
                 <a href="#">About</a> 
@@ -37,7 +37,7 @@
             </li>
         </ul>
     </div>
-    <form class="navbar-search pull-right" action="/invoice/search/" method="GET">
+    <form class="navbar-search pull-right" action="/search/" method="GET">
         {% csrf_token %}
         <input type="text" class="search-query" placeholder="Search..." name="q"> 
     </form>
@@ -49,10 +49,10 @@
     <div class="span3">
       <ul class="nav  nav-pills nav-stacked">
         <li class="active">
-          <a href="/invoice/">Invoices</a> 
+          <a href="/invoices/">Invoices</a> 
       </li>
       <li>
-          <a href="/customer/">Customers</a> 
+          <a href="/customers/">Customers</a> 
       </li>
   </ul>
   <div class="well">
