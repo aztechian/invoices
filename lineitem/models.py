@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 class LineItem(models.Model):
-	invoice = models.ForeignKey('invoice.Invoice')
+	invoice = models.ForeignKey('invoice.Invoice', related_name='lineitems')
 	description = models.CharField(max_length=120)
 	quantity = models.IntegerField(default=1)
 	taxable = models.BooleanField(default=True)

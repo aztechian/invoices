@@ -1,8 +1,15 @@
 from django.conf.urls import patterns, include, url
+from rest_framework.routers import DefaultRouter
 
-# Uncomment the next two lines to enable the admin:
-from django.contrib import admin
-admin.autodiscover()
+from lineitem.views import LineItemViewSet
+from invoice.views import InvoiceViewSet
+from customer.views import CustomerViewSet, PermissionViewSet
+
+router = DefaultRouter()
+router.register(r'lineitems', LineItemViewSet)
+router.register(r'invoices', InvoiceViewSet)
+router.register(r'customers', CustomerViewSet)
+router.register(r'permissions', PermissionViewSet)
 
 urlpatterns = patterns('',
     # Examples:
@@ -13,7 +20,7 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    # url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^', include('invoice.urls'))
+    url(r'^api/', include(router.urls))
 )

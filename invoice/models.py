@@ -1,40 +1,40 @@
 from django.db import models
 from decimal import Decimal, ROUND_HALF_UP
-
+from customer.models import Customer
 # Create your models here.
 
 class Invoice(models.Model):
 	invoice_date = models.DateTimeField(auto_now_add=True)
 	paid_date = models.DateTimeField(blank=True, null=True)
 	sent_date = models.DateTimeField(blank=True, null=True)
-	customer = models.CharField(max_length=90)
+	customer = models.ForeignKey('customer.Customer')
 
 	def _get_grand_total(self):
-		total = Decimal(0.0)
-		for li in self.lineitem_set.all():
+		total = Decimal("0.0")
+		for li in self.lineitems.all():
 			if li.taxable:
-				total += Decimal((li.unit_price * li.quantity)* Decimal(1.0675))
+				total += Decimal((li.unit_price * li.quantity)* Decimal("1.0675"))
 			else:
 				total += Decimal(li.unit_price * li.quantity)
 		return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 	def _get_taxable_total(self):
-		total = Decimal(0.0)
-		for li in self.lineitem_set.all():
+		total = Decimal("0.0")
+		for li in self.lineitems.all():
 			if li.taxable:
 				total += Decimal(li.unit_price * li.quantity)
 		return total
 
 	def _get_total_tax(self):
-		total = Decimal(0.0)
-		for li in self.lineitem_set.all():
+		total = Decimal("0.0")
+		for li in self.lineitems.all():
 			if li.taxable:
-				total += Decimal(li.unit_price * li.quantity* Decimal(0.0675))
+				total += Decimal(li.unit_price * li.quantity* Decimal("0.0675"))
 		return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 	def _get_sub_total(self):
-		total = Decimal(0.0)
-		for li in self.lineitem_set.all():
+		total = Decimal("0.0")
+		for li in self.lineitems.all():
 				total += Decimal(li.unit_price * li.quantity)
 		return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
