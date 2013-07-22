@@ -128,6 +128,7 @@ INSTALLED_APPS = (
     'invoice',
     'lineitem',
     'customer',
+    'ui',
     'rest_framework'
 )
 

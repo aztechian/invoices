@@ -3,13 +3,14 @@ from rest_framework.routers import DefaultRouter
 
 from lineitem.views import LineItemViewSet
 from invoice.views import InvoiceViewSet
-from customer.views import CustomerViewSet, PermissionViewSet
+from customer.views import CustomerViewSet, PermissionViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register(r'lineitems', LineItemViewSet)
 router.register(r'invoices', InvoiceViewSet)
 router.register(r'customers', CustomerViewSet)
 router.register(r'permissions', PermissionViewSet)
+router.register(r'users', UserViewSet)
 
 urlpatterns = patterns('',
     # Examples:
@@ -22,5 +23,6 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^api/', include(router.urls))
+    url(r'^api/', include(router.urls)),
+    url(r'^', include('ui.urls'))
 )
