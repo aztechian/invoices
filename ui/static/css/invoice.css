@@ -1,3 +1,7 @@
+/*css for customer views*/
+.popover {
+	background-color: #5c5c5c;
+}
 
 /*css for invoice views*/
 .recipient, .totalbox {

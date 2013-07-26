@@ -1,0 +1,62 @@
+{% extends "ui/base.html" %}
+{% load staticfiles %}
+
+{% block title-addendum %} - Customers{% endblock title-addendum %}
+
+{% block css %}
+	{{ block.super }}
+	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+{% endblock css %}
+
+{% block sidenav %}
+<ul class="nav nav-pills nav-stacked">
+	<li class="active"><a href="#">Active</a></li>
+	<li><a href="#">All</a></li>
+	<li><a href="#">Overdue</a></li>
+</ul>
+{% endblock sidenav %}
+
+{% block main-content %}
+<h1 style="display: inline-block">Customer List</h1><i style="display: inline-block" class="icon-spinner icon-2x icon-spin"></i>
+<table class="table table-bordered table-hover">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Address</th>
+			<th>Email</th>
+			<th>Phone</th>
+		</tr>
+	</thead>
+	<tbody data-bind="foreach: customerList">
+		<tr data-content: "Hello There" rel="popover">
+			<td data-bind="text: full_name"></td>
+			<td data-bind="text: oneline_address"></td>
+			<td data-bind="text: email"></td>
+			<td data-bind="text: formatted_phone"></td>
+		</tr>
+	</tbody>
+</table>
+<i class="icon-plus-sign icon-large pull-left"> Add Customer</i>
+{% endblock main-content %}
+
+{% block javascript %}
+	{{ block.super }}
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
+	<script type="text/javascript" src="{% static 'js/customer.js' %}"></script>
+	<script type="text/javascript">
+		/*global ko, customer, $ */
+		$('#nav_customers').addClass('active');
+		ko.applyBindings(customer, $("table")[0]);
+		
+		$(document).on('click', 'i.icon-plus-sign', function(event){});
+	</script>
+{% endblock javascript %}
+
+{% block hidden-html %}
+		<tr class="newrow">
+			<td data-bind="text: full_name"></td>
+			<td data-bind="text: oneline_address"></td>
+			<td data-bind="text: email"></td>
+			<td data-bind="text: formatted_phone"></td>
+		</tr>
+{% endblock hidden-html %}
