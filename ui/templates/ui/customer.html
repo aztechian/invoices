@@ -5,7 +5,8 @@
 
 {% block css %}
 	{{ block.super }}
-	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.0/select2.css" type="text/css" />
+	<link rel="stylesheet" href="{% static 'css/invoice.css' %}" type="text/css" />
 {% endblock css %}
 
 {% block sidenav %}
@@ -16,47 +17,159 @@
 </ul>
 {% endblock sidenav %}
 
+{% block tip-content %}
+<p><b>Tip:</b>Press ENTER when editing customer fields to immediately save changes.</p>
+{% endblock tip-content %}
+
 {% block main-content %}
-<h1 style="display: inline-block">Customer List</h1><i style="display: inline-block" class="icon-spinner icon-2x icon-spin"></i>
-<table class="table table-bordered table-hover">
-	<thead>
-		<tr>
-			<th>Name</th>
-			<th>Address</th>
-			<th>Email</th>
-			<th>Phone</th>
-		</tr>
-	</thead>
-	<tbody data-bind="foreach: customerList">
-		<tr data-content: "Hello There" rel="popover">
-			<td data-bind="text: full_name"></td>
-			<td data-bind="text: oneline_address"></td>
-			<td data-bind="text: email"></td>
-			<td data-bind="text: formatted_phone"></td>
-		</tr>
-	</tbody>
-</table>
-<i class="icon-plus-sign icon-large pull-left"> Add Customer</i>
+<h1 style="display: inline-block">Customer List</h1>
+<i style="display: inline-block" class="icon-spinner icon-2x icon-spin"></i>
+<div id="customer_table" class="row-fluid">
+	<div class="customer_thead row-fluid">
+		<div class="container-fluid span3 th">
+			<span>Name</span>
+		</div>
+		<div class="container-fluid span4 th">
+			<span>Address</span>
+		</div>
+		<div class="container-fluid span2 th">
+			<span>Email</span>
+		</div>
+		<div class="container-fluid span2 th">
+			<span>Phone</span>
+		</div>
+	</div>
+	<!-- ko foreach: customerList -->
+	<div class="customer_tr row-fluid">
+		<div class="row-fluid">
+			<div class="container-fluid span3" data-bind="text: full_name"></div>
+			<div class="container-fluid span4" data-bind="text: oneline_address"></div>
+			<div class="container-fluid span2" data-bind="text: email"></div>
+			<div class="container-fluid span2" data-bind="text: formatted_phone"></div>
+		</div>
+		<div class="detail-box row-fluid fade in hide" style="background-color: #555;">
+			<form>
+			<div class="container-fluid span4">
+				<input type="text" name="first_name" placeholder="First Name" data-bind="value: first_name">
+				<input type="text" name="last_name" placeholder="Last Name" data-bind="value: last_name">
+				<input type="email" name="email" placeholder="Email" data-bind="value: email">
+				<input type="text" name="phone" placeholder="Phone (unformatted)" data-bind="value: phone">
+			</div>
+			<div class="container-fluid span4">
+				<input type="text" name="street1" placeholder="Address 1" data-bind="value: street1">
+				<input type="text" name="street2" placeholder="Address 2" data-bind="value: street2">
+				<input type="text" name="city" placeholder="City" data-bind="value: city">
+				<select>
+					<option value="AL">Alabama</option>
+					<option value="AK">Alaska</option>
+					<option value="AS">American Samoa</option>
+					<option value="AZ">Arizona</option>
+					<option value="AR">Arkansas</option>
+					<option value="CA">California</option>
+					<option value="CO">Colorado</option>
+				</select>
+				<!--<input type="text" name="state" placeholder="State" data-bind="value: state">-->
+				<input type="text" name="zip_code" placeholder="Zip Code" data-bind="value: zip_code">
+			</div>
+			<div class="container-fluid span4">
+				<input type="text" name="username" placeholder="Username" data-bind="value: username">
+				<input type="password" name="password" placeholder="Password" data-bind="value: password">
+				<input type="text" name="date_joined" placeholder="Today" data-bind="value: date_joined" disabled>
+				<label for="user_is_active">
+					<input id="user_is_active" type="checkbox" name="is_active" data-bind="checked: is_active"> Active?</label>
+				<button class="customer_save btn btn-primary pull-right">Save</button>
+			</div>
+			</form>
+		</div>
+	</div>
+	<!-- /ko -->
+</div>
+<a href="#"><i style="padding-top: 8px;" class="icon-plus-sign icon-large pull-left"> Add Customer</i></a>
 {% endblock main-content %}
 
 {% block javascript %}
 	{{ block.super }}
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.0/select2.min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
 	<script type="text/javascript" src="{% static 'js/customer.js' %}"></script>
 	<script type="text/javascript">
 		/*global ko, customer, $ */
+		
 		$('#nav_customers').addClass('active');
 		ko.applyBindings(customer, $("table")[0]);
 		
-		$(document).on('click', 'i.icon-plus-sign', function(event){});
+		$(document).on('click', 'i.icon-plus-sign', function(event){
+			customer.addCustomer();
+			$('#customer_table').find(".customer_tr:last").trigger('click');
+			event.preventDefault();
+			event.stopPropagation();
+		});
+		
+		$(document).on('click', 'button.customer_save', function(event){
+			//is this a new record?
+			var boundObject = ko.dataFor(this);
+			boundObject.date_joined(new Date().toISOString())
+			var toSubmit = ko.toJS(boundObject);
+			delete toSubmit.formatted_phone;
+			delete toSubmit.oneline_address;
+			delete toSubmit.full_name;
+			if( boundObject.pk() <= 0 ) {
+				$.ajax({
+					url: '/api/customers/',
+					dataType: 'json',
+					data: JSON.stringify(toSubmit),
+					type: 'POST',
+					contentType: 'application/json; charset=UTF-8'
+				}).done(function(data, textStatus, jqXhr){
+					var tempPk = parseInt(data.url.split('/').slice(-2,-1)[0], 10);
+					boundObject.pk(tempPk);
+					boundObject.date_joined(data.date_joined);
+					$(event.target).closest(".detail-box").hide('fast');
+					$(event.target).closest(".expanded-info").removeClass("expanded-info");
+				}).fail(function(jqXhr, textStatus, errorThrown){
+					$(event.target).closest(".detail-box").find("input").css("border-color", '');
+					if( jqXhr.status === 400 ){
+						var badFields = jqXhr.responseJSON,
+						detailBox = $(event.target).closest('.detail-box');
+						$.each(badFields, function(i, v){
+							detailBox.find("input[name="+i+"]").css("border-color", "red");
+						});
+					}
+				});
+			}
+			event.preventDefault();
+			event.stopPropagation();
+			return false;
+		});
+		
+		$(document).on('click', '.customer_tr', function(event){
+			if( $(event.target).closest(".detail-box").length > 0 ){
+				event.preventDefault();
+				event.stopPropagation();
+				return false;
+			}
+			
+			var detailDiv = $(event.currentTarget).find("div.detail-box"),
+			basicDiv = $(event.currentTarget).find("div:first"),
+			targetVisible = detailDiv.is(':visible'); //save our targets' status
+			
+			$(".customer_tr .detail-box").hide('fast');
+			$(".customer_tr .expanded-info").removeClass("expanded-info");
+			if( !targetVisible ){
+				detailDiv.show('fast');
+				basicDiv.addClass("expanded-info");
+			}
+			event.preventDefault();
+			event.stopPropagation();
+		});
+		
+		$(document).ready(function() {
+			setTimeout(function() {
+				$(".detail-box select").select2();
+			}, 500);
+		});
 	</script>
 {% endblock javascript %}
 
 {% block hidden-html %}
-		<tr class="newrow">
-			<td data-bind="text: full_name"></td>
-			<td data-bind="text: oneline_address"></td>
-			<td data-bind="text: email"></td>
-			<td data-bind="text: formatted_phone"></td>
-		</tr>
 {% endblock hidden-html %}

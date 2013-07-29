@@ -2,6 +2,15 @@
 
 {% block title-addendum %} - Home{% endblock title-addendum %}
 
+{% block sidenav %}
+	<ul class="nav nav-pills nav-stacked">
+		<li class="active"><a href="/invoices/">Create Invoices</a></li>
+		<li><a href="/invoices/">Print Invoices</a></li>
+		<li><a href="/invoices/">Unpaid Invoices</a></li>
+		<li><a href="/customers/">Edit Customers</a></li>
+	</ul>
+{% endblock sidenav %}
+
 {% block main-content %}
 <div class="hero-unit">
 	<h1>Invoicing</h1>
@@ -37,8 +46,7 @@
 	</table>
 {% else %}
 	<p>No invoices are available. You should
-		<a href="/invoice/add">create one</a>
-		<i class="img-plus"></i>
+		<a href="/invoice/add">create one.</a>
 	</p>
 {% endif %}
 {% endblock main-content %}
