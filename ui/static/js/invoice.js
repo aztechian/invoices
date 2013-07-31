@@ -1,10 +1,8 @@
 /*globals ko, $, lineitem */
-var Invoice = (function($) {
+var invoice = (function($) {
 	'use strict';
 	var invoiceList = ko.observableArray(),
-	currentInvoice = {
-		detailedInvoice: ko.observable(null)
-	},
+	currentInvoice = ko.observable(null),
 	TAX_RATE = 1.0675,
 	
 	InvoiceViewModel = function(serverData){
@@ -99,12 +97,12 @@ var Invoice = (function($) {
 	},
 
 	init = function() {
-		$.getJSON("/api/invoices/", function(data){
-			$.each(data, function(i, val){
-				var inv = new InvoiceViewModel(val);
+		$.getJSON("/api/invoices/1/", function(data){
+			// $.each(data, function(i, val){
+				var inv = new InvoiceViewModel(data);
 				invoiceList.push(inv);
-			});
-			setInvoice(0);
+				currentInvoice = inv;
+			// });
 		});
 	},
 
@@ -120,7 +118,6 @@ var Invoice = (function($) {
 		currentInvoice: currentInvoice,
 		setInvoice: setInvoice
 	};
-});
-
-var invoice = Invoice(jQuery);
+})(jQuery);
 invoice.init();
+

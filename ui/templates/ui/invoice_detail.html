@@ -17,9 +17,9 @@
 {% endblock header %}
 
 {% block main-content %}
-<div class="invoice-body" data-bind="with: detailedInvoice">
+<div class="invoice-body">
 	<div class="row-fluid">
-		<div class="pull-right invoice-id">Invoice #{{ invoice.pk }}</div>
+		<div class="pull-right invoice-id" data-bind="text: 'Invoice #'+pk()"></div>
 	</div>
 	<form id="lineitem-form">
 		<div class="row-fluid">

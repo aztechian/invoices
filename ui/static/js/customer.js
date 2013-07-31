@@ -87,7 +87,6 @@ var customer = (function($) {
 		init: init,
 		addCustomer: addCustomer,
 		customerList: customerList
-		
 	};
 }(jQuery));
 
