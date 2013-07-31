@@ -2,9 +2,10 @@
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+TAX_RATE = "1.0675"
 
 ADMINS = (
-    # ('Ian Martin', 'ian@imartin.net'),
+    ('Ian Martin', 'ian@imartin.net'),
 )
 
 MANAGERS = ADMINS

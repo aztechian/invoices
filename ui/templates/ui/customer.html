@@ -26,10 +26,13 @@
 <i style="display: inline-block" class="icon-spinner icon-2x icon-spin"></i>
 <div id="customer_table" class="row-fluid">
 	<div class="customer_thead row-fluid">
-		<div class="container-fluid span3 th">
+		<div class="container-fluid span1 th">
+			<span>&nbsp;</span>
+		</div>
+		<div class="container-fluid span2 th">
 			<span>Name</span>
 		</div>
-		<div class="container-fluid span4 th">
+		<div class="container-fluid span3 th">
 			<span>Address</span>
 		</div>
 		<div class="container-fluid span2 th">
@@ -42,8 +45,9 @@
 	<!-- ko foreach: customerList -->
 	<div class="customer_tr row-fluid">
 		<div class="row-fluid">
-			<div class="container-fluid span3" data-bind="text: full_name"></div>
-			<div class="container-fluid span4" data-bind="text: oneline_address"></div>
+			<div class="container-fluid span1"><i class="customer_action icon-remove-circle" data-title="Delete Contact"></i><span class="label hide">Saved</span></div>
+			<div class="container-fluid span2" data-bind="text: full_name"></div>
+			<div class="container-fluid span3" data-bind="text: oneline_address"></div>
 			<div class="container-fluid span2" data-bind="text: email"></div>
 			<div class="container-fluid span2" data-bind="text: formatted_phone"></div>
 		</div>
@@ -77,7 +81,10 @@
 				<input type="text" name="date_joined" placeholder="Today" data-bind="value: date_joined" disabled>
 				<label for="user_is_active">
 					<input id="user_is_active" type="checkbox" name="is_active" data-bind="checked: is_active"> Active?</label>
-				<button class="customer_save btn btn-primary pull-right">Save</button>
+				<div class="pull-right">
+					<button class="customer_save btn btn-primary">Save</button>
+					<button class="customer_reset btn btn-default">Reset</button>
+				</div>
 			</div>
 			</form>
 		</div>
@@ -163,8 +170,17 @@
 			event.stopPropagation();
 		});
 		
+		$(document).on('click', ".customer_tr .customer_action.icon-remove-circle", function(event){
+			var theCustomer = ko.dataFor(this);
+			alert("Really delete " + theCustomer.full_name() + "?\nYou may consider simply deactivating them instead.");
+			event.preventDefault();
+			event.stopPropagation();
+			return false;
+		});
+		
 		$(document).ready(function() {
 			setTimeout(function() {
+				$(".customer_action").tooltip();
 				$(".detail-box select").select2();
 			}, 500);
 		});

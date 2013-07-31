@@ -56,7 +56,10 @@ var customer = (function($) {
 			tmpAddr += " " + self.city() + ", " + self.state() + " " + self.zip_code();
 			if( tmpAddr.trim() === ',')
 				tmpAddr = '';
-			return (tmpAddr.length > 30) ? tmpAddr.slice(0,30) + "..." : tmpAddr;
+			if( tmpAddr.length > 25 )
+				return tmpAddr.slice(0,14) + '...' + tmpAddr.slice(-7, -1);
+			else
+				return tmpAddr;
 		});
 		
 		self.full_name = ko.computed(function(){

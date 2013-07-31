@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from decimal import Decimal, ROUND_HALF_UP
 
 # Create your models here.
 
@@ -10,8 +12,9 @@ class LineItem(models.Model):
 	unit_price = models.DecimalField(max_digits=6, decimal_places=2)
 	
 	def _get_total(self):
-		#TODO should this return total + tax?
-		return self.quantity * self.unit_price
+		# DON'T return total + tax here. Tax should be calc'd on the sum total, not per item.
+		# so, we can't do that summing in LineItem
+		return Decimal(self.quantity * self.unit_price);
 	
 	total = property(_get_total)
 	

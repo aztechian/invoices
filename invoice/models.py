@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from decimal import Decimal, ROUND_HALF_UP
 from customer.models import Customer
@@ -31,25 +32,30 @@ class Invoice(models.Model):
 
 	def _get_grand_total(self):
 		total = Decimal("0.0")
+		taxable = Decimal("0.0")
 		for li in self.lineitems.all():
 			if li.taxable:
-				total += Decimal((li.unit_price * li.quantity)* Decimal("1.0675"))
+				taxable += li.total
 			else:
-				total += Decimal(li.unit_price * li.quantity)
+				total += li.total
+		taxable = taxable * Decimal(settings.TAX_RATE)
+		total += taxable
 		return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 	def _get_taxable_total(self):
 		total = Decimal("0.0")
 		for li in self.lineitems.all():
 			if li.taxable:
-				total += Decimal(li.unit_price * li.quantity)
-		return total
+				total += li.total
+		return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 	def _get_total_tax(self):
 		total = Decimal("0.0")
+		inv_tax_rate = Decimal(settings.TAX_RATE) - Decimal("1.0")
 		for li in self.lineitems.all():
 			if li.taxable:
-				total += Decimal(li.unit_price * li.quantity* Decimal("0.0675"))
+				total += Decimal(li.unit_price * li.quantity)
+		total = total * inv_tax_rate;
 		return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 	def _get_sub_total(self):
