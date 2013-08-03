@@ -2,12 +2,13 @@
 var invoice = (function($) {
 	'use strict';
 	var invoiceList = ko.observableArray(),
-	currentInvoice = ko.observable(null),
+	currentInvoice = ko.observable(),
 	TAX_RATE = 1.0675,
 	
 	InvoiceViewModel = function(serverData){
-		var self = this,
-		populateLineItems = function(){
+		var self = this;
+		
+		self.populateLineItems = function(){
 			ko.utils.arrayForEach(self.lineitems(), function(uri){
 				console.log("Calling GET for: " + uri);
 				$.getJSON(uri, function(data){
@@ -16,35 +17,55 @@ var invoice = (function($) {
 			});
 		};
 		
-		self.url = ko.observable(serverData.url);
-		self.invoice_date = ko.observable(serverData.invoice_date);
-		self.paid_date = ko.observable(serverData.paid_date);
-		self.sent_date = ko.observable(serverData.sent_date);
-		self.customer = ko.observable(serverData.customer);
-		self.owner = ko.observable(serverData.owner);
-		self.shorturl = ko.observable(serverData.shorturl);
-		self.first_name = ko.observable(serverData.first_name);
-		self.last_name = ko.observable(serverData.last_name);
-		self.street1 = ko.observable(serverData.street1);
-		self.street2 = ko.observable(serverData.street2);
-		self.city = ko.observable(serverData.city);
-		self.state = ko.observable(serverData.state);
-		self.zip_code = ko.observable(serverData.zip_code);
-		self.email = ko.observable(serverData.email);
-		self.phone = ko.observable(serverData.phone);
 		self.lineitems = ko.observableArray();
 		self.lineitemObjs = ko.observableArray();
-		
+		if( serverData !== null && serverData !== undefined ){
+			self.url = ko.observable(serverData.url);
+			self.invoice_date = ko.observable(serverData.invoice_date);
+			self.paid_date = ko.observable(serverData.paid_date);
+			self.sent_date = ko.observable(serverData.sent_date);
+			self.customer = ko.observable(serverData.customer);
+			self.owner = ko.observable(serverData.owner);
+			self.shorturl = ko.observable(serverData.shorturl);
+			self.first_name = ko.observable(serverData.first_name);
+			self.last_name = ko.observable(serverData.last_name);
+			self.street1 = ko.observable(serverData.street1);
+			self.street2 = ko.observable(serverData.street2);
+			self.city = ko.observable(serverData.city);
+			self.state = ko.observable(serverData.state);
+			self.zip_code = ko.observable(serverData.zip_code);
+			self.email = ko.observable(serverData.email);
+			self.phone = ko.observable(serverData.phone);
+			
+			$.each(serverData.lineitems, function(i,v){
+				var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
+				self.lineitems.push(relUrl);
+			});
+		}
+		else {
+			self.url = ko.observable("");
+			self.invoice_date = ko.observable("");
+			self.paid_date = ko.observable("");
+			self.sent_date = ko.observable("");
+			self.customer = ko.observable("");
+			self.owner = ko.observable("");
+			self.shorturl = ko.observable("");
+			self.first_name = ko.observable("");
+			self.last_name = ko.observable("");
+			self.street1 = ko.observable("");
+			self.street2 = ko.observable("");
+			self.city = ko.observable("");
+			self.state = ko.observable("");
+			self.zip_code = ko.observable("");
+			self.email = ko.observable("");
+			self.phone = ko.observable("");
+		}
+	
 		self.pk = ko.computed(function(){
+			if( self.url() === "" )
+				return -1;
 			return parseInt(self.url().split('/').slice(-2,-1), 10);
 		});
-		
-		$.each(serverData.lineitems, function(i,v){
-			var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
-			self.lineitems.push(relUrl);
-		});
-		console.log("lineitems for invoice #" + self.pk() + ": " + self.lineitems());
-		populateLineItems();
 		
 		self.full_name = ko.computed(function(){
 			return self.first_name() + " " + self.last_name();
@@ -97,17 +118,17 @@ var invoice = (function($) {
 	},
 
 	init = function() {
-		$.getJSON("/api/invoices/1/", function(data){
-			// $.each(data, function(i, val){
+		$.getJSON("/api/invoices/", function(data){
+			$.each(data, function(i, val){
 				var inv = new InvoiceViewModel(data);
 				invoiceList.push(inv);
-				currentInvoice = inv;
-			// });
+			});
 		});
 	},
 
 	setInvoice = function(idx) {
-		currentInvoice = invoiceList()[idx];
+		currentInvoice(invoiceList()[idx]);
+		currentInvoice().populateLineItems();
 	};
 
 	return {

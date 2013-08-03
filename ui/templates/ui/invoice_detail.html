@@ -17,9 +17,9 @@
 {% endblock header %}
 
 {% block main-content %}
-<div class="invoice-body">
+<div class="invoice-body" data-bind="with: currentInvoice">
 	<div class="row-fluid">
-		<div class="pull-right invoice-id" data-bind="text: 'Invoice #'+pk()"></div>
+		<div class="pull-right invoice-id" data-bind="text: 'Invoice #' + pk()"></div>
 	</div>
 	<form id="lineitem-form">
 		<div class="row-fluid">
@@ -28,7 +28,7 @@
 					<br>123 Main St
 					<br>Anytown, USA 12345</p>
 			</div>
-			<div class="span3 pull-right recipient address">
+			<div class="span3 pull-right recipient address" data-bind="with: currentInvoice">
 				<div data-bind="text: full_name"></div>
 				<div data-bind="text: street1"></div>
 				<div data-bind="text: street2"></div>
@@ -67,7 +67,7 @@
         <p class="totalLabel">Sub Total: <span class="total currency">{{ invoice.sub_total }}</span></p>
         <p class="totalLabel">Tax: <span class="total currency">{{ invoice.total_tax }}</span> 
         </p>
-        <p class="totalLabel">Grand Total: <span class="total currency">{{ invoice.grand_total }}</span> 
+        <p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: currentInvoice.grand_total"></span> 
         </p>
       </div>
     </div>
@@ -90,16 +90,16 @@
 	$().ready(function() {
 		$("#lineitem-list a").editable();
 
-		var newrow = $(document.getElementById("templates").innerHTML);
-		var $newrow = newrow.clone();
-		$newrow.attr('id', 'newlineitem').css('background', '#FAFAE6');
-		var currRowCount = $('#lineitem-list tbody')[0].rows.length;
-		$newrow.children('td:first').html(currRowCount); //it already be +1 because of the template row
-		$('#lineitem-list tbody').append($newrow);
-		$newrow.find('a').editable();
-		$newrow.show('slow', function() {
-			$newrow.css('background', '');
-		});
+		// var newrow = $(document.getElementById("templates").innerHTML);
+		// var $newrow = newrow.clone();
+		// $newrow.attr('id', 'newlineitem').css('background', '#FAFAE6');
+		// var currRowCount = $('#lineitem-list tbody')[0].rows.length;
+		// $newrow.children('td:first').html(currRowCount); //it already be +1 because of the template row
+		// $('#lineitem-list tbody').append($newrow);
+		// $newrow.find('a').editable();
+		// $newrow.show('slow', function() {
+		// 	$newrow.css('background', '');
+		// });
 
 		// $('.recipient').editable({
 		//   value: {
@@ -144,8 +144,8 @@
 		}
 	});
 	
-	ko.applyBindings(invoice.currentInvoice, $('div.invoice-body'));
-	
+	ko.applyBindings(invoice);
+	invoice.setInvoice(0);
 </script>
 {% endblock javascript %}
 
