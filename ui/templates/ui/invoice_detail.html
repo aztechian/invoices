@@ -28,7 +28,7 @@
 					<br>123 Main St
 					<br>Anytown, USA 12345</p>
 			</div>
-			<div class="span3 pull-right recipient address" data-bind="with: currentInvoice">
+			<div class="span3 pull-right recipient address">
 				<div data-bind="text: full_name"></div>
 				<div data-bind="text: street1"></div>
 				<div data-bind="text: street2"></div>
@@ -52,10 +52,10 @@
 			</thead>
 			<tbody data-bind="foreach: lineitemObjs">
 				<tr data-bind="attr: {id: pk}">
-					<td data-bind="text: $index + 1"></td>
+					<td data-bind="text: $index() + 1"></td>
 					<td><a href="#" data-type="text" data-title="Description" data-bind="text: description"></a></td>
 					<td><a href="#" data-type="text" data-title="Quantity" data-bind="text: quantity"></a></td>
-					<td><a href="#" data-type="text" data-title="Unit Price" class="currency" data-bind="text: unit_price"></a></td>
+					<td><a href="#" data-type="text" data-title="Unit Price" class="currency" data-bind="text: parseFloat(unit_price()).toFixed(2)"></a></td>
 					<td><input name="Taxable" type="checkbox" data-bind="checked: taxable"></input></td>
 					<td id="total" class="currency" data-bind="text: total"></td>
 				</tr>
@@ -64,10 +64,10 @@
         </form>
       <hr>
       <div class="totalbox">
-        <p class="totalLabel">Sub Total: <span class="total currency">{{ invoice.sub_total }}</span></p>
-        <p class="totalLabel">Tax: <span class="total currency">{{ invoice.total_tax }}</span> 
+        <p class="totalLabel">Sub Total: <span class="total currency" data-bind="text: sub_total"></span></p>
+        <p class="totalLabel">Tax: <span class="total currency" data-bind="text: total_tax"></span> 
         </p>
-        <p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: currentInvoice.grand_total"></span> 
+        <p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: grand_total"></span> 
         </p>
       </div>
     </div>
@@ -145,7 +145,6 @@
 	});
 	
 	ko.applyBindings(invoice);
-	invoice.setInvoice(0);
 </script>
 {% endblock javascript %}
 

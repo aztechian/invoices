@@ -76,38 +76,38 @@ var invoice = (function($) {
 			taxableTotal = 0.0;
 			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
 				if( lineitem.taxable() )
-					taxableTotal += lineitem.total();
+					taxableTotal += parseFloat(lineitem.total());
 				else
-					gTotal = lineitem.total();
+					gTotal += parseFloat(lineitem.total());
 			});
 			taxableTotal = taxableTotal * TAX_RATE;
-			return gTotal + taxableTotal;
+			return (gTotal + taxableTotal).toFixed(2);
 		});
 		
 		self.taxable_total = ko.computed(function(){
 			var total = 0.0;
 			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
 				if( lineitem.taxable() )
-					total += lineitem.total();
+					total += parseFloat(lineitem.total());
 			});
-			return total;
+			return total.toFixed(2);
 		});
 		
 		self.total_tax = ko.computed(function(){
 			var total = 0.0;
 			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
 				if( lineitem.taxable() )
-					total += lineitem.total();
+					total += parseFloat(lineitem.total());
 			});
-			return total * (1.0 - TAX_RATE);
+			return (total * (TAX_RATE - 1.0)).toFixed(2);
 		});
 		
 		self.sub_total = ko.computed(function(){
 			var total = 0.0;
 			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
-				total += lineitem.total();
+				total += parseFloat(lineitem.total());
 			});
-			return total;
+			return total.toFixed(2);
 		});
 	},
 	
@@ -120,13 +120,15 @@ var invoice = (function($) {
 	init = function() {
 		$.getJSON("/api/invoices/", function(data){
 			$.each(data, function(i, val){
-				var inv = new InvoiceViewModel(data);
+				var inv = new InvoiceViewModel(val);
 				invoiceList.push(inv);
 			});
+			setInvoice(0);
 		});
 	},
 
 	setInvoice = function(idx) {
+		console.log("Called setInvoice with " + idx);
 		currentInvoice(invoiceList()[idx]);
 		currentInvoice().populateLineItems();
 	};
