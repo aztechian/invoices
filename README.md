@@ -1,5 +1,6 @@
 invoices
 ========
+[![Build Status](https://code.imartin.net/buildStatus/icon?job=invoices)](https://code.imartin.net/job/invoices/)
 
 Django application for invoicing.
 
