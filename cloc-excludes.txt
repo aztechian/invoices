@@ -1,0 +1,13 @@
+ui/static/css/bootstrap.min.css
+ui/static/css/bootstrap.css
+ui/static/css/bootstrap-theme.min.css
+ui/static/css/bootstrap-responsive.min.css
+ui/static/css/bootstrap-responsive.css
+ui/static/css/bootstrap-editable.min.css
+ui/static/js/bootstrap-editable.js
+ui/static/js/bootstrap-editable.min.js
+ui/static/js/bootstrap.js
+ui/static/js/bootstrap-editable.js
+ui/static/js/jquery-1.10.0.min.js
+invoices/wsgi.py
+manage.py
