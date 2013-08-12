@@ -1,0 +1,59 @@
+{% extends "ui/base.html" %}
+
+{% block title-addendum %} - Home{% endblock title-addendum %}
+
+{% block sidenav %}
+	<ul class="nav nav-pills nav-stacked">
+		<li class="active"><a href="/invoices/">Create Invoices</a></li>
+		<li><a href="/invoices/">Print Invoices</a></li>
+		<li><a href="/invoices/">Unpaid Invoices</a></li>
+		<li><a href="/customers/">Edit Customers</a></li>
+	</ul>
+{% endblock sidenav %}
+
+{% block main-content %}
+<div class="hero-unit">
+	<h1>Invoicing</h1>
+	<p>Lets all get paid!</p>
+	<p>
+		<a class="btn btn-large btn-primary" href="/invoice/add">Get Started!<br></a>
+	</p>
+</div>
+<h1>Recent Invoices</h1>
+{% if latest_invoice_list %}
+	<table class="table table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Invoice</th>
+				<th>Amount</th>
+				<th>Paid?</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for invoice in latest_invoice_list %}
+			<tr id={{ invoice.pk }}>
+				<td id=id_{{ invoice.pk }}>{{ invoice.pk }}</td>
+				<td>{{ invoice.customer }}</td>
+				<td>${{ invoice.grand_total }}</td>
+				<td>
+					<i class={%if invoice.is_paid %} "icon-ok-sign"{% else %}
+					"icon-thumbs-down"{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% else %}
+	<p>No invoices are available. You should
+		<a href="/invoice/add">create one.</a>
+	</p>
+{% endif %}
+{% endblock main-content %}
+
+{% block javascript %}
+	{{block.super}}
+	<script type="text/javascript">
+		$('#nav_home').addClass('active');
+	</script>
+{% endblock javascript %}
