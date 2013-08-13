@@ -88,6 +88,11 @@
     content: '$';
 }
 
+.totalbox .total {
+	float: right;
+	min-width: 75px;
+}
+
 tbody td {
     height: 30px;
 }

@@ -4,6 +4,15 @@ var invoice = (function($) {
 	var invoiceList = ko.observableArray(),
 	currentInvoice = ko.observable(),
 	TAX_RATE = 1.0675,
+	queryType = "all",
+	displayMode = ko.computed(function(){
+		if( currentInvoice() !== undefined )
+			return 'invoice-detail';
+		if( invoiceList().length <= 0 )
+			return 'invoice-none';
+		else
+			return 'invoice-list';
+	}),
 	
 	InvoiceViewModel = function(serverData){
 		var self = this;
@@ -37,6 +46,8 @@ var invoice = (function($) {
 			self.email = ko.observable(serverData.email);
 			self.phone = ko.observable(serverData.phone);
 			
+			self.cached_grand_total = ko.observable(serverData.grand_total);
+			
 			$.each(serverData.lineitems, function(i,v){
 				var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
 				self.lineitems.push(relUrl);
@@ -59,6 +70,8 @@ var invoice = (function($) {
 			self.zip_code = ko.observable("");
 			self.email = ko.observable("");
 			self.phone = ko.observable("");
+			
+			self.cached_grand_total = ko.observable();
 		}
 	
 		self.pk = ko.computed(function(){
@@ -74,6 +87,9 @@ var invoice = (function($) {
 		self.grand_total = ko.computed(function(){
 			var gTotal = 0.0,
 			taxableTotal = 0.0;
+			if( self.lineitemObjs().length <= 0 )
+				return parseFloat(self.cached_grand_total()).toFixed(2);
+			
 			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
 				if( lineitem.taxable() )
 					taxableTotal += parseFloat(lineitem.total());
@@ -123,7 +139,6 @@ var invoice = (function($) {
 				var inv = new InvoiceViewModel(val);
 				invoiceList.push(inv);
 			});
-			setInvoice(0);
 		});
 	},
 
@@ -139,7 +154,9 @@ var invoice = (function($) {
 		addInvoice: addInvoice,
 		InvoiceViewModel: InvoiceViewModel,
 		currentInvoice: currentInvoice,
-		setInvoice: setInvoice
+		setInvoice: setInvoice,
+		displayMode: displayMode,
+		queryType: queryType
 	};
 })(jQuery);
 invoice.init();

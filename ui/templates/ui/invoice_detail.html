@@ -9,7 +9,7 @@
 {% endblock css %}
 
 {% block header %}
-<header>
+<header data-bind="visible: displayMode() === 'invoice-detail'">
 	<h3 class="status complete">Created</h3>
 	<h3 class="status inprocess">Sent</h3>
 	<h3 class="status inprocess">$Paid$</h3>
@@ -17,62 +17,8 @@
 {% endblock header %}
 
 {% block main-content %}
-<div class="invoice-body" data-bind="with: currentInvoice">
-	<div class="row-fluid">
-		<div class="pull-right invoice-id" data-bind="text: 'Invoice #' + pk()"></div>
-	</div>
-	<form id="lineitem-form">
-		<div class="row-fluid">
-			<div class="span3 sender address">
-				<p>Mark
-					<br>123 Main St
-					<br>Anytown, USA 12345</p>
-			</div>
-			<div class="span3 pull-right recipient address">
-				<div data-bind="text: full_name"></div>
-				<div data-bind="text: street1"></div>
-				<div data-bind="text: street2"></div>
-				<span data-bind="text: city"></span>, <span data-bind="text: state"></span> <span data-bind="text: zip_code"></span>
-				<br>
-			</div>
-		</div>
-		<div class="row-fluid">
-			<div class="span7 offset1 invoice-heading">Invoice header, status, etc</div>
-		</div>
-		<table id="lineitem-list" class="table">
-			<thead>
-				<tr>
-					<th style="width: 5%">&nbsp;</th>
-					<th style="width: 50%">Description</th>
-					<th style="width: 5%">Qty.</th>
-					<th style="width: 13%">Unit Price</th>
-					<th style="width: 5%">Taxable</th>
-					<th style="width: 12%">Total Price</th>
-				</tr>
-			</thead>
-			<tbody data-bind="foreach: lineitemObjs">
-				<tr data-bind="attr: {id: pk}">
-					<td data-bind="text: $index() + 1"></td>
-					<td><a href="#" data-type="text" data-title="Description" data-bind="text: description"></a></td>
-					<td><a href="#" data-type="text" data-title="Quantity" data-bind="text: quantity"></a></td>
-					<td><a href="#" data-type="text" data-title="Unit Price" class="currency" data-bind="text: parseFloat(unit_price()).toFixed(2)"></a></td>
-					<td><input name="Taxable" type="checkbox" data-bind="checked: taxable"></input></td>
-					<td id="total" class="currency" data-bind="text: total"></td>
-				</tr>
-            </tbody>
-          </table>
-        </form>
-      <hr>
-      <div class="totalbox">
-        <p class="totalLabel">Sub Total: <span class="total currency" data-bind="text: sub_total"></span></p>
-        <p class="totalLabel">Tax: <span class="total currency" data-bind="text: total_tax"></span> 
-        </p>
-        <p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: grand_total"></span> 
-        </p>
-      </div>
-    </div>
-    <button type="button" class="btn pull-right" style="margin: 4px;">Cancel</button>
-    <button type="button" class="btn btn-primary pull-right" style="margin: 4px;">Save</button>
+<!-- ko template: displayMode --><!-- /ko -->
+
 {% endblock main-content %}
 
 {% block javascript %}
@@ -80,7 +26,8 @@
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
 	<script type="text/javascript" src="{% static 'js/lineitem.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/invoice.js' %}"></script>
-<script type="text/javascript">
+	
+	<script type="text/javascript">
 	/*global ko, $, invoice, lineitem */
 	'use strict';
 	$.fn.editable.defaults.mode = 'inline';
@@ -145,24 +92,96 @@
 	});
 	
 	ko.applyBindings(invoice);
-</script>
+	</script>
 {% endblock javascript %}
 
 {% block hidden-html %}
-<tr id="lineitem-template" style="display: none;">
-	<td></td>
-	<td>
-		<a href="#" data-type="text" data-title="Description"></a>
-	</td>
-	<td>
-		<a href="#" data-type="text" data-title="Quantity"></a>
-	</td>
-	<td>
-		<a href="#" data-type="text" data-title="Unit Price" class="currency"></a>
-	</td>
-	<td>
-		<input name="Taxable" type="checkbox" value="True" checked></input>
-	</td>
-	<td id="total" class="currency">0.00</td>
-</tr>
+<script type="text/html" id="invoice-none">
+	<div>No <span data-bind="text: queryType" invoices</div>
+	<div>You should <a href="#">create some</a>.</div>
+</script>
+
+<script type="text/html" id="invoice-detail">
+	<div class="invoice-body" data-bind="with: currentInvoice">
+	<div class="row-fluid">
+		<div class="pull-right invoice-id" data-bind="text: 'Invoice #' + pk()"></div>
+	</div>
+	<form id="lineitem-form">
+		<div class="row-fluid">
+			<div class="span3 sender address">
+				<p>Mark
+					<br>123 Main St
+					<br>Anytown, USA 12345</p>
+			</div>
+			<div class="span3 pull-right recipient address">
+				<div data-bind="text: full_name"></div>
+				<div data-bind="text: street1"></div>
+				<div data-bind="text: street2"></div>
+				<span data-bind="text: city"></span>, <span data-bind="text: state"></span> <span data-bind="text: zip_code"></span>
+				<br>
+			</div>
+		</div>
+		<div class="row-fluid">
+			<div class="span7 offset1 invoice-heading">Invoice header, status, etc</div>
+		</div>
+		<table id="lineitem-list" class="table">
+			<thead>
+				<tr>
+					<th style="width: 5%">&nbsp;</th>
+					<th style="width: 50%">Description</th>
+					<th style="width: 5%">Qty.</th>
+					<th style="width: 13%">Unit Price</th>
+					<th style="width: 5%">Taxable</th>
+					<th style="width: 12%">Total Price</th>
+				</tr>
+			</thead>
+			<tbody data-bind="foreach: lineitemObjs">
+				<tr data-bind="attr: {id: pk}">
+					<td data-bind="text: $index() + 1"></td>
+					<td><a href="#" data-type="text" data-title="Description" data-bind="text: description"></a></td>
+					<td><a href="#" data-type="text" data-title="Quantity" data-bind="text: quantity"></a></td>
+					<td><a href="#" data-type="text" data-title="Unit Price" class="currency" data-bind="text: parseFloat(unit_price()).toFixed(2)"></a></td>
+					<td><input name="Taxable" type="checkbox" data-bind="checked: taxable"></input></td>
+					<td id="total" class="currency" data-bind="text: total"></td>
+				</tr>
+            </tbody>
+          </table>
+        </form>
+      <hr>
+      <div class="totalbox">
+        <p class="totalLabel">Sub Total: <span class="total currency" data-bind="text: sub_total"></span></p>
+        <p class="totalLabel">Tax: <span class="total currency" data-bind="text: total_tax"></span> 
+        </p>
+        <p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: grand_total"></span> 
+        </p>
+      </div>
+    </div>
+    <button type="button" class="btn pull-right" style="margin: 4px;">Cancel</button>
+    <button type="button" class="btn btn-primary pull-right" style="margin: 4px;">Save</button>
+</script>
+
+<script type="text/html" id="invoice-list">
+	<h1>Invoice List</h1>
+	<table class="table table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Invoice</th>
+				<th>Amount</th>
+				<th>Paid?</th>
+			</tr>
+		</thead>
+		<tbody data-bind="foreach: invoiceList">
+			<tr>
+				<td data-bind="text: pk"></td>
+				<td data-bind="text: full_name"></td>
+				<td class="currency" data-bind="text: grand_total"></td>
+				<td>
+					<i data-bind="attr: {class: (paid_date() === null) ? 'icon-check-empty' : 'icon-check'}"></i>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</script>
+
 {% endblock hidden-html %}
