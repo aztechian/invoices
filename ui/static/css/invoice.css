@@ -84,6 +84,10 @@
 	margin: 10px 0 10px 10px;
 }
 
+#invoice-table tr:hover {
+	cursor: pointer;
+}
+
 .currency:before {
     content: '$';
 }

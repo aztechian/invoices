@@ -18,9 +18,12 @@ var invoice = (function($) {
 		var self = this;
 		
 		self.populateLineItems = function(){
+			if( self.lineitems().length === self.lineitemObjs().length )
+				return;
 			ko.utils.arrayForEach(self.lineitems(), function(uri){
 				console.log("Calling GET for: " + uri);
 				$.getJSON(uri, function(data){
+					//TODO check if the object exists before pushing
 					self.lineitemObjs.push(new lineitem.LineItemViewModel(data));
 				});
 			});
@@ -54,28 +57,28 @@ var invoice = (function($) {
 			});
 		}
 		else {
-			self.url = ko.observable("");
-			self.invoice_date = ko.observable("");
-			self.paid_date = ko.observable("");
-			self.sent_date = ko.observable("");
-			self.customer = ko.observable("");
-			self.owner = ko.observable("");
-			self.shorturl = ko.observable("");
-			self.first_name = ko.observable("");
-			self.last_name = ko.observable("");
-			self.street1 = ko.observable("");
-			self.street2 = ko.observable("");
-			self.city = ko.observable("");
-			self.state = ko.observable("");
-			self.zip_code = ko.observable("");
-			self.email = ko.observable("");
-			self.phone = ko.observable("");
+			self.url = ko.observable();
+			self.invoice_date = ko.observable();
+			self.paid_date = ko.observable();
+			self.sent_date = ko.observable();
+			self.customer = ko.observable();
+			self.owner = ko.observable();
+			self.shorturl = ko.observable();
+			self.first_name = ko.observable();
+			self.last_name = ko.observable();
+			self.street1 = ko.observable();
+			self.street2 = ko.observable();
+			self.city = ko.observable();
+			self.state = ko.observable();
+			self.zip_code = ko.observable();
+			self.email = ko.observable();
+			self.phone = ko.observable();
 			
 			self.cached_grand_total = ko.observable();
 		}
 	
 		self.pk = ko.computed(function(){
-			if( self.url() === "" )
+			if( self.url() === "" || self.url() === undefined )
 				return -1;
 			return parseInt(self.url().split('/').slice(-2,-1), 10);
 		});
@@ -125,6 +128,27 @@ var invoice = (function($) {
 			});
 			return total.toFixed(2);
 		});
+		
+		self.save = function(){
+			$.ajax({
+				url: self.url(),
+				contentType: "application/json; charset=UTF-8",
+				data: ko.toJSON(self),
+				type: "PUT"
+			}).done(function(data){
+				console.log("Saved.");
+			}).fail(function(jqXhr, statusText, status){
+				console.log(status);
+			});
+		};
+		
+		self.allAttrs = ko.computed(function(){
+			ko.toJS(self);
+		}).extend( { throttle: 500 });
+		
+		self.allAttrs.subscribe(function(){
+			self.save();
+		});
 	},
 	
 	addInvoice = function(){
@@ -140,12 +164,31 @@ var invoice = (function($) {
 				invoiceList.push(inv);
 			});
 		});
+		
+		$(document).on('click', '#invoice-table tbody tr', function(event){
+			console.log("Here");
+			var invObj = ko.dataFor(this);
+			setInvoice(invoiceList.indexOf(invObj));
+		});
+		
+		$(document).on('click', '#done-btn', function(){
+			currentInvoice(undefined);
+		});
 	},
 
 	setInvoice = function(idx) {
 		console.log("Called setInvoice with " + idx);
 		currentInvoice(invoiceList()[idx]);
 		currentInvoice().populateLineItems();
+	};
+	
+	InvoiceViewModel.prototype.toJSON = function(){
+		var copy = {
+			paid_date: this.paid_date,
+			sent_date: this.sent_date,
+			customer: this.customer
+		};
+		return JSON.stringify(copy);
 	};
 
 	return {
