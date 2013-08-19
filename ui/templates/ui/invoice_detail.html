@@ -9,7 +9,8 @@
 {% endblock css %}
 
 {% block header %}
-<header data-bind="visible: displayMode() === 'invoice-detail'">
+<header data-bind="visible: displayMode() === 'invoice-detail'" style="display: none;">
+	<span class="pull-left"><i class="icon-level-up icon-3x icon-rotate-270"></i></span>
 	<h3 class="status complete">Created</h3>
 	<h3 class="status inprocess">Sent</h3>
 	<h3 class="status inprocess">$Paid$</h3>
@@ -51,6 +52,8 @@
 	'use strict';
 	$.fn.editable.defaults.mode = 'inline';
 	$.fn.editable.defaults.showbuttons = false;
+	$.fn.editable.defaults.onblur = 'submit';
+	$.fn.editable.defaults.send = 'always';
 	$('#nav_invoices').addClass('active');
 	
 	$().ready(function() {
@@ -174,8 +177,8 @@
 				<tr data-bind="attr: {id: pk}">
 					<td data-bind="text: $index() + 1"></td>
 					<td><span href="#" data-type="text" data-title="Description" data-bind="editable: description"></span></td>
-					<td><span href="#" data-type="text" data-title="Quantity" data-bind="editable: quantity"></span></td>
-					<td><span href="#" data-type="text" data-title="Unit Price" class="currency" data-bind="text: parseFloat(unit_price()).toFixed(2)"></span></td>
+					<td><span href="#" data-type="text" data-title="Quantity" data-bind="editable: view_qty"></span></td>
+					<td><span href="#" data-type="text" data-title="Unit Price" class="currency" data-bind="editable: view_unit_price"></span></td>
 					<td><input name="Taxable" type="checkbox" data-bind="checked: taxable"></input></td>
 					<td id="total" class="currency" data-bind="text: total"></td>
 				</tr>
@@ -219,6 +222,10 @@
 			</tr>
 		</tbody>
 	</table>
+</script>
+
+<script type="text/html" id="loading">
+	<div id="loading" style="text-align: center"><h1>Loading <i class="icon-spinner icon-spin"></i></h1></div>
 </script>
 
 {% endblock hidden-html %}

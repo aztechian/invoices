@@ -5,14 +5,7 @@ var invoice = (function($) {
 	currentInvoice = ko.observable(),
 	TAX_RATE = 1.0675,
 	queryType = "all",
-	displayMode = ko.computed(function(){
-		if( currentInvoice() !== undefined )
-			return 'invoice-detail';
-		if( invoiceList().length <= 0 )
-			return 'invoice-none';
-		else
-			return 'invoice-list';
-	}),
+	displayMode = ko.observable('loading'),
 	
 	InvoiceViewModel = function(serverData){
 		var self = this;
@@ -32,6 +25,7 @@ var invoice = (function($) {
 		self.lineitems = ko.observableArray();
 		self.lineitemObjs = ko.observableArray();
 		if( serverData !== null && serverData !== undefined ){
+			// var relUrl = $('<a/>').attr('href',serverData.url)[0].pathname.replace(/^[^\/]/,'/');
 			self.url = ko.observable(serverData.url);
 			self.invoice_date = ko.observable(serverData.invoice_date);
 			self.paid_date = ko.observable(serverData.paid_date);
@@ -52,8 +46,8 @@ var invoice = (function($) {
 			self.cached_grand_total = ko.observable(serverData.grand_total);
 			
 			$.each(serverData.lineitems, function(i,v){
-				var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
-				self.lineitems.push(relUrl);
+				// var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
+				self.lineitems.push(v);
 			});
 		}
 		else {
@@ -143,7 +137,11 @@ var invoice = (function($) {
 		};
 		
 		self.allAttrs = ko.computed(function(){
-			ko.toJS(self);
+			self.invoice_date();
+			self.sent_date();
+			self.paid_date();
+			self.customer();
+			self.owner();
 		}).extend( { throttle: 500 });
 		
 		self.allAttrs.subscribe(function(){
@@ -163,6 +161,8 @@ var invoice = (function($) {
 				var inv = new InvoiceViewModel(val);
 				invoiceList.push(inv);
 			});
+			$("#loading").hide();
+			displayMode('invoice-list');
 		});
 		
 		$(document).on('click', '#invoice-table tbody tr', function(event){
@@ -171,22 +171,39 @@ var invoice = (function($) {
 			setInvoice(invoiceList.indexOf(invObj));
 		});
 		
-		$(document).on('click', '#done-btn', function(){
-			currentInvoice(undefined);
+		$(document).on('click', '#done-btn', function(event){
+			var doneInv = currentInvoice();
+			$.getJSON(doneInv.url(), function(data){
+				doneInv.cached_grand_total(data.grand_total);
+				doneInv.first_name(data.first_name);
+				doneInv.last_name(data.last_name);
+				doneInv.invoice_date(data.invoice_date);
+				doneInv.sent_date(data.sent_date);
+				doneInv.paid_date(data.paid_date);
+			});
+			setInvoice(undefined);
 		});
 	},
 
 	setInvoice = function(idx) {
-		console.log("Called setInvoice with " + idx);
-		currentInvoice(invoiceList()[idx]);
-		currentInvoice().populateLineItems();
+		if( idx === undefined ){
+			currentInvoice(undefined);
+			displayMode('invoice-list');
+		}
+		else{
+			console.log("Called setInvoice with " + idx);
+			currentInvoice(invoiceList()[idx]);
+			currentInvoice().populateLineItems();
+			displayMode('invoice-detail');
+		}
 	};
 	
 	InvoiceViewModel.prototype.toJSON = function(){
 		var copy = {
-			paid_date: this.paid_date,
-			sent_date: this.sent_date,
-			customer: this.customer
+			paid_date: this.paid_date(),
+			sent_date: this.sent_date(),
+			customer: this.customer(),
+			owner: this.owner()
 		};
 		return JSON.stringify(copy);
 	};
