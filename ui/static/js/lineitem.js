@@ -5,13 +5,22 @@ var LineItem = (function($){
 	var LineItemViewModel = function(serverData){
 		var self = this;
 		
-		self.description = ko.observable(serverData.description);
-		self.taxable = ko.observable(serverData.taxable);
-		self.unit_price = ko.observable(serverData.unit_price);
-		self.quantity = ko.observable(serverData.quantity);
-		self.invoice = ko.observable(serverData.invoice);
-		self.url = ko.observable(serverData.url);
-		
+		if( serverData === undefined || serverData === null ){
+			self.description = ko.observable("");
+			self.taxable = ko.observable(false);
+			self.unit_price = ko.observable(0);
+			self.quantity = ko.observable(1);
+			self.invoice = ko.observable(-1);
+			self.url = ko.observable("");
+		}
+		else {
+			self.description = ko.observable(serverData.description);
+			self.taxable = ko.observable(serverData.taxable);
+			self.unit_price = ko.observable(serverData.unit_price);
+			self.quantity = ko.observable(serverData.quantity);
+			self.invoice = ko.observable(serverData.invoice);
+			self.url = ko.observable(serverData.url);
+		}
 		self.total = ko.computed(function(){
 			var price = parseFloat(self.unit_price()),
 			qty = parseInt(self.quantity(), 10);

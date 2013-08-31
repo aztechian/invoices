@@ -58,6 +58,14 @@
 	
 	$().ready(function() {
 		$("#lineitem-list a").editable();
+		$.getJSON("/api/customers/", function(data){
+			var autolist = [];
+			$.each(data, function(i,v){
+				autolist.push(data[i].first_name + " " + data[i].last_name);
+			});
+			console.log("Got customer list: " + JSON.stringify(autolist));
+			$("#customer-dialog .typeahead").typeahead({source: autolist});
+		});
 
 		// var newrow = $(document.getElementById("templates").innerHTML);
 		// var $newrow = newrow.clone();
@@ -113,10 +121,11 @@
 		}
 	});
 	
-	$(document).on('click', '#new-invoice', function(event){
-		invoice.addInvoice();
-		invoice.setInvoice(invoice.invoiceList().length - 1);
-	});
+	// $(document).on('click', '#new-invoice', function(event){
+	// 	var inv = invoice.addInvoice();
+	// 	invoice.setInvoice(invoice.invoiceList().length - 1);
+	// 	inv.addLineItem();
+	// });
 	
 	$(document).on('click', '#invoice-table #paid-icon', function(event){
 		var elem = ko.dataFor(this);
@@ -199,7 +208,6 @@
 
 <script type="text/html" id="invoice-list">
 	<h1 style="display: inline;">Invoice List</h1>
-	<button id="new-invoice" style="vertical-align: bottom;" type="button" class="btn btn-success pull-right">New</button>
 	<table id="invoice-table" class="table table-bordered table-hover">
 		<thead>
 			<tr>
@@ -207,6 +215,7 @@
 				<th>Invoice</th>
 				<th>Date</th>
 				<th>Amount</th>
+				<th>Send?</th>
 				<th>Paid?</th>
 			</tr>
 		</thead>
@@ -217,11 +226,31 @@
 				<td data-bind="text: moment(invoice_date()).format('MM/DD/YYYY')"></td>
 				<td class="currency" data-bind="text: cached_grand_total"></td>
 				<td>
+					<i id="sent-icon" data-bind="attr: {class: (sent_date() === null) ? 'icon-check-empty' : 'icon-check'}"></i>
+				</td>
+				<td>
 					<i id="paid-icon" data-bind="attr: {class: (paid_date() === null) ? 'icon-check-empty' : 'icon-check'}"></i>
 				</td>
 			</tr>
 		</tbody>
 	</table>
+	<a href="#" data-toggle="modal" data-target="#customer_chooser" id="new-invoice"><i style="padding-top: 8px;" class="icon-plus-sign icon-large pull-left"> Add Invoice</i></a>
+
+	<div id="customer_chooser" class="modal hide fade">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>Select Customer</h3>
+	</div>
+	<div class="modal-body">
+		<div>
+			<input id="customer_typeahead" class="typeahead" type="text" data-provide="typeahead" autocomplete="off">
+		</div>
+	</div>
+	<div class="modal-footer">
+		<a href="#" class="btn">Close</a>
+		<a href="#" class="btn btn-primary">Select</a>
+	</div>
+</div>
 </script>
 
 <script type="text/html" id="loading">

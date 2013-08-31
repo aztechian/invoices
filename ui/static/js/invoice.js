@@ -24,52 +24,34 @@ var invoice = (function($) {
 		
 		self.lineitems = ko.observableArray();
 		self.lineitemObjs = ko.observableArray();
-		if( serverData !== null && serverData !== undefined ){
-			// var relUrl = $('<a/>').attr('href',serverData.url)[0].pathname.replace(/^[^\/]/,'/');
-			self.url = ko.observable(serverData.url);
-			self.invoice_date = ko.observable(serverData.invoice_date);
-			self.paid_date = ko.observable(serverData.paid_date);
-			self.sent_date = ko.observable(serverData.sent_date);
-			self.customer = ko.observable(serverData.customer);
-			self.owner = ko.observable(serverData.owner);
-			self.shorturl = ko.observable(serverData.shorturl);
-			self.first_name = ko.observable(serverData.first_name);
-			self.last_name = ko.observable(serverData.last_name);
-			self.street1 = ko.observable(serverData.street1);
-			self.street2 = ko.observable(serverData.street2);
-			self.city = ko.observable(serverData.city);
-			self.state = ko.observable(serverData.state);
-			self.zip_code = ko.observable(serverData.zip_code);
-			self.email = ko.observable(serverData.email);
-			self.phone = ko.observable(serverData.phone);
-			
-			self.cached_grand_total = ko.observable(serverData.grand_total);
-			
-			$.each(serverData.lineitems, function(i,v){
-				// var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
-				self.lineitems.push(v);
-			});
+		if( serverData === null || serverData === undefined )
+		{
+			return undefined;
 		}
-		else {
-			self.url = ko.observable();
-			self.invoice_date = ko.observable();
-			self.paid_date = ko.observable();
-			self.sent_date = ko.observable();
-			self.customer = ko.observable();
-			self.owner = ko.observable();
-			self.shorturl = ko.observable();
-			self.first_name = ko.observable();
-			self.last_name = ko.observable();
-			self.street1 = ko.observable();
-			self.street2 = ko.observable();
-			self.city = ko.observable();
-			self.state = ko.observable();
-			self.zip_code = ko.observable();
-			self.email = ko.observable();
-			self.phone = ko.observable();
-			
-			self.cached_grand_total = ko.observable();
-		}
+
+		self.url = ko.observable(serverData.url);
+		self.invoice_date = ko.observable(serverData.invoice_date);
+		self.paid_date = ko.observable(serverData.paid_date);
+		self.sent_date = ko.observable(serverData.sent_date);
+		self.customer = ko.observable(serverData.customer);
+		self.owner = ko.observable(serverData.owner);
+		self.shorturl = ko.observable(serverData.shorturl);
+		self.first_name = ko.observable(serverData.first_name);
+		self.last_name = ko.observable(serverData.last_name);
+		self.street1 = ko.observable(serverData.street1);
+		self.street2 = ko.observable(serverData.street2);
+		self.city = ko.observable(serverData.city);
+		self.state = ko.observable(serverData.state);
+		self.zip_code = ko.observable(serverData.zip_code);
+		self.email = ko.observable(serverData.email);
+		self.phone = ko.observable(serverData.phone);
+		
+		self.cached_grand_total = ko.observable(serverData.grand_total);
+		
+		$.each(serverData.lineitems, function(i,v){
+			// var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
+			self.lineitems.push(v);
+		});
 	
 		self.pk = ko.computed(function(){
 			if( self.url() === "" || self.url() === undefined )
@@ -123,6 +105,11 @@ var invoice = (function($) {
 			return total.toFixed(2);
 		});
 		
+		self.addLineItem = function(){
+			self.lineitemObjs.push(new lineitem.LineItemViewModel());
+			self.lineitems.push("");
+		};
+		
 		self.save = function(){
 			$.ajax({
 				url: self.url(),
@@ -166,12 +153,11 @@ var invoice = (function($) {
 		});
 		
 		$(document).on('click', '#invoice-table tbody tr', function(event){
-			console.log("Here");
 			var invObj = ko.dataFor(this);
 			setInvoice(invoiceList.indexOf(invObj));
 		});
 		
-		$(document).on('click', '#done-btn', function(event){
+		$(document).on('click', '#done-btn, i.icon-level-up', function(event){
 			var doneInv = currentInvoice();
 			$.getJSON(doneInv.url(), function(data){
 				doneInv.cached_grand_total(data.grand_total);
