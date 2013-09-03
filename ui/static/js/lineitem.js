@@ -2,25 +2,11 @@
 
 var LineItem = (function($){
 	'use strict';
-	var LineItemViewModel = function(serverData){
+	var zeroPrice = parseFloat("0", 10).toFixed(2),
+	LineItemViewModel = function(serverData){
 		var self = this;
+		self.loadData(serverData);
 		
-		if( serverData === undefined || serverData === null ){
-			self.description = ko.observable("");
-			self.taxable = ko.observable(false);
-			self.unit_price = ko.observable(0);
-			self.quantity = ko.observable(1);
-			self.invoice = ko.observable(-1);
-			self.url = ko.observable("");
-		}
-		else {
-			self.description = ko.observable(serverData.description);
-			self.taxable = ko.observable(serverData.taxable);
-			self.unit_price = ko.observable(serverData.unit_price);
-			self.quantity = ko.observable(serverData.quantity);
-			self.invoice = ko.observable(serverData.invoice);
-			self.url = ko.observable(serverData.url);
-		}
 		self.total = ko.computed(function(){
 			var price = parseFloat(self.unit_price()),
 			qty = parseInt(self.quantity(), 10);
@@ -63,40 +49,43 @@ var LineItem = (function($){
 		self.allAttrs.subscribe(function(){
 			self.save();
 		});
-		
-		self.save = function(){
-			if( self.pk() > 0 ){
-				$.ajax({
-					url: self.url(),
-					contentType: "application/json; charset=UTF-8",
-					data: ko.toJSON(self),
-					type: "PUT"
-				}).done(function(data){
-					console.log("Updated lineitem.");
-				}).fail(function(jqXhr, statusText, status){
-					console.log(status);
-				});
-			}
-			else{
-				$.ajax({
-					url: '/api/lineitems/',
-					contentType: "application/json; charset=UTF-8",
-					data: ko.toJSON(self),
-					type: "POST"
-				}).done(function(data){
-					console.log("Saved lineitem.");
-					self.url(data.url);
-				}).fail(function(jqXhr, statusText, status){
-					console.log(status);
-				});
-			}
-		};
-	},
-	
-	init = function(){
-		return true;
 	};
 	
+	LineItemViewModel.prototype.save = function(){
+		var self = this;
+		if( self.invoice() === "" || self.invoice() === undefined || 
+			self.description() === "" || self.description() === undefined ||
+			self.unit_price() === undefined ){
+			return false;
+		}
+		var def = $.Deferred(),
+		ajaxType = (self.pk() > 0) ? "PUT" : "POST";
+		$.ajax({
+			url: (self.pk() > 0) ? self.url() :'/api/lineitems/',
+			contentType: "application/json; charset=UTF-8",
+			data: ko.toJSON(self),
+			type: ajaxType
+		}).done(function(data){
+			console.log("Saved lineitem." + self.pk());
+			self.loadData(data);
+			def.resolve();
+		}).fail(function(jqXhr, statusText, status){
+			console.log(status);
+			def.reject(jqXhr);
+		});
+		return def.promise();
+	};
+	
+	LineItemViewModel.prototype.loadData = function(serverData){
+		var self = this;
+		self.description = ko.observable(serverData.description || "");
+		self.taxable = ko.observable(serverData.taxable || false);
+		self.unit_price = ko.observable(serverData.unit_price || zeroPrice);
+		self.quantity = ko.observable(serverData.quantity || 1);
+		self.invoice = ko.observable(serverData.invoice);
+		self.url = ko.observable(serverData.url || "");
+	};
+
 	LineItem.prototype.toJSON = function(){
 		var clone = ko.toJS(this);
 		delete clone.save;
@@ -107,6 +96,10 @@ var LineItem = (function($){
 		delete clone.total;
 		delete clone.url;
 		return JSON.stringify(clone);
+	};
+	
+	var init = function(){
+		return true;
 	};
 	
 	return {

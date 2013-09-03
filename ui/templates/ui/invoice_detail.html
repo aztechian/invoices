@@ -6,6 +6,7 @@
 {% block css %}
 	{{block.super}}
 	<link rel="stylesheet" href="{% static 'css/invoice.css' %}" type="text/css" />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.1/select2.min.css" type="text/css" />
 {% endblock css %}
 
 {% block header %}
@@ -41,6 +42,7 @@
 
 {% block javascript %}
 	{{ block.super }}
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.1/select2.min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
 	<script type="text/javascript" src="{% static 'js/knockout.x-editable.js' %}"></script>
@@ -56,16 +58,35 @@
 	$.fn.editable.defaults.send = 'always';
 	$('#nav_invoices').addClass('active');
 	
+	var customer2Typeahead = function(parsedResponse){
+		console.log("Filtering " + parsedResponse);
+		var datumArray=[];
+		$.each(parsedResponse, function(i, v) {
+			var datum= {
+				value: v.first_name +" " + v.last_name, 
+				tokens:[v.first_name, v.last_name, v.username], 
+				name: v.url
+			};
+			datumArray.push(datum);
+		});
+		return datumArray;
+	},
+	
+	returnFromDetail = function(){
+		var doneInv = invoice.currentInvoice();
+		$.getJSON(doneInv.url(), function(data){
+			doneInv.cached_grand_total(data.grand_total);
+			doneInv.first_name(data.first_name);
+			doneInv.last_name(data.last_name);
+			doneInv.invoice_date(data.invoice_date);
+			doneInv.sent_date(data.sent_date);
+			doneInv.paid_date(data.paid_date);
+			invoice.setInvoice();
+		});
+	};
+	
 	$().ready(function() {
 		$("#lineitem-list a").editable();
-		$.getJSON("/api/customers/", function(data){
-			var autolist = [];
-			$.each(data, function(i,v){
-				autolist.push(data[i].first_name + " " + data[i].last_name);
-			});
-			console.log("Got customer list: " + JSON.stringify(autolist));
-			$("#customer-dialog .typeahead").typeahead({source: autolist});
-		});
 
 		// var newrow = $(document.getElementById("templates").innerHTML);
 		// var $newrow = newrow.clone();
@@ -121,11 +142,58 @@
 		}
 	});
 	
-	// $(document).on('click', '#new-invoice', function(event){
-	// 	var inv = invoice.addInvoice();
-	// 	invoice.setInvoice(invoice.invoiceList().length - 1);
-	// 	inv.addLineItem();
-	// });
+	$(document).on('click', '#invoice-table tbody tr', function(event){
+		invoice.setInvoice(ko.dataFor(this));
+	});
+		
+	$(document).on('click', '#done-btn, i.icon-level-up', function(event){
+		returnFromDetail();
+	});
+	
+	$(document).on('keyup', function(event){
+		if( invoice.displayMode() === 'invoice-detail' )
+			returnFromDetail();
+	});
+	
+	$(document).on('click', '#new-invoice', function(event){
+		$("#customer_chooser").modal("show");
+		//This doesn't really have to wait for completion of the modal(show), because
+		// we only needed to wait until the KO template with the modal was loaded before
+		// init'ing the select2
+		console.log("init'ing typeahead");
+		$("#selectbox-o").select2({
+			placeholder: "Customer",
+			minimumInputLength: 1,
+			ajax: {
+				url: "/api/customers/",
+				dataType: 'json',
+				data: function(term, page){
+					return { search: term };
+				},
+				results: function(data, page){
+					var arr = [];
+					$.each(data, function(i,v){
+						arr.push({ id: v.url, text: v.first_name + " " + v.last_name });
+					});
+					return { results: arr };
+				}
+			}
+		});
+	});
+	
+	$(document).on('click', '#customer_chooser .modal-footer .btn-primary', function(event){
+		var invPromise = invoice.addInvoice( $("#selectbox-o").val() );
+		invPromise.done( function(newInvoice){
+			newInvoice.addLineItem();
+			$("#customer_chooser").modal("hide");
+			invoice.setInvoice(newInvoice);
+		}).fail(function(jqXhr, status){
+			var $alert = $(document.getElementById("alert-template").innerHTML);
+			$alert.append("Unable to create invoice: " + status.statusCode + ", " + status.statusText);
+			$("#customer_chooser .modal-header").append($alert);
+			console.log("This failed miserably. What the hell were you thinking??" + JSON.stringify(status));
+		});
+	});
 	
 	$(document).on('click', '#invoice-table #paid-icon', function(event){
 		var elem = ko.dataFor(this);
@@ -191,19 +259,17 @@
 					<td><input name="Taxable" type="checkbox" data-bind="checked: taxable"></input></td>
 					<td id="total" class="currency" data-bind="text: total"></td>
 				</tr>
-            </tbody>
-          </table>
-        </form>
-      <hr>
-      <div class="totalbox">
-        <p class="totalLabel">Sub Total: <span class="total currency" data-bind="text: sub_total"></span></p>
-        <p class="totalLabel">Tax: <span class="total currency" data-bind="text: total_tax"></span> 
-        </p>
-        <p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: grand_total"></span> 
-        </p>
-      </div>
-    </div>
-    <button type="button" id="done-btn" class="btn btn-primary pull-right" style="margin: 4px;">Done</button>
+			</tbody>
+		</table>
+	</form>
+	<hr>
+	<div class="totalbox">
+		<p class="totalLabel">Sub Total: <span class="total currency" data-bind="text: sub_total"></span></p>
+		<p class="totalLabel">Tax: <span class="total currency" data-bind="text: total_tax"></span> </p>
+		<p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: grand_total"></span> </p>
+	</div>
+</div>
+<button type="button" id="done-btn" class="btn btn-primary pull-right" style="margin: 4px;">Done</button>
 </script>
 
 <script type="text/html" id="invoice-list">
@@ -234,27 +300,33 @@
 			</tr>
 		</tbody>
 	</table>
-	<a href="#" data-toggle="modal" data-target="#customer_chooser" id="new-invoice"><i style="padding-top: 8px;" class="icon-plus-sign icon-large pull-left"> Add Invoice</i></a>
+	<a href="#" id="new-invoice"><i style="padding-top: 8px;" class="icon-plus-sign icon-large pull-left"> Add Invoice</i></a>
 
 	<div id="customer_chooser" class="modal hide fade">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		<h3>Select Customer</h3>
 	</div>
-	<div class="modal-body">
-		<div>
-			<input id="customer_typeahead" class="typeahead" type="text" data-provide="typeahead" autocomplete="off">
-		</div>
+	<div class="modal-body" style="text-align: center;">
+		<label>Customer: </label>
+		<input type="hidden" name="customer" id="selectbox-o" class="input-xlarge" />
 	</div>
 	<div class="modal-footer">
-		<a href="#" class="btn">Close</a>
-		<a href="#" class="btn btn-primary">Select</a>
+		<a href="#" class="btn" data-dismiss="modal">Cancel</a>
+		<a href="#" class="btn btn-primary">Create Invoice</a>
 	</div>
 </div>
 </script>
 
 <script type="text/html" id="loading">
 	<div id="loading" style="text-align: center"><h1>Loading <i class="icon-spinner icon-spin"></i></h1></div>
+</script>
+
+<script type="text/html" id="alert-template">
+	<div class="alert alert-error">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		<strong>Uh oh.</strong>
+	</div>
 </script>
 
 {% endblock hidden-html %}

@@ -10,49 +10,9 @@ var invoice = (function($) {
 	InvoiceViewModel = function(serverData){
 		var self = this;
 		
-		self.populateLineItems = function(){
-			if( self.lineitems().length === self.lineitemObjs().length )
-				return;
-			ko.utils.arrayForEach(self.lineitems(), function(uri){
-				console.log("Calling GET for: " + uri);
-				$.getJSON(uri, function(data){
-					//TODO check if the object exists before pushing
-					self.lineitemObjs.push(new lineitem.LineItemViewModel(data));
-				});
-			});
-		};
-		
 		self.lineitems = ko.observableArray();
 		self.lineitemObjs = ko.observableArray();
-		if( serverData === null || serverData === undefined )
-		{
-			return undefined;
-		}
-
-		self.url = ko.observable(serverData.url);
-		self.invoice_date = ko.observable(serverData.invoice_date);
-		self.paid_date = ko.observable(serverData.paid_date);
-		self.sent_date = ko.observable(serverData.sent_date);
-		self.customer = ko.observable(serverData.customer);
-		self.owner = ko.observable(serverData.owner);
-		self.shorturl = ko.observable(serverData.shorturl);
-		self.first_name = ko.observable(serverData.first_name);
-		self.last_name = ko.observable(serverData.last_name);
-		self.street1 = ko.observable(serverData.street1);
-		self.street2 = ko.observable(serverData.street2);
-		self.city = ko.observable(serverData.city);
-		self.state = ko.observable(serverData.state);
-		self.zip_code = ko.observable(serverData.zip_code);
-		self.email = ko.observable(serverData.email);
-		self.phone = ko.observable(serverData.phone);
-		
-		self.cached_grand_total = ko.observable(serverData.grand_total);
-		
-		$.each(serverData.lineitems, function(i,v){
-			// var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
-			self.lineitems.push(v);
-		});
-	
+		self.loadData(serverData);
 		self.pk = ko.computed(function(){
 			if( self.url() === "" || self.url() === undefined )
 				return -1;
@@ -111,6 +71,7 @@ var invoice = (function($) {
 		};
 		
 		self.save = function(){
+			var def = $.Deferred();
 			$.ajax({
 				url: self.url(),
 				contentType: "application/json; charset=UTF-8",
@@ -118,9 +79,12 @@ var invoice = (function($) {
 				type: "PUT"
 			}).done(function(data){
 				console.log("Saved.");
+				def.resolve();
 			}).fail(function(jqXhr, statusText, status){
 				console.log(status);
+				def.reject(jqXhr, status);
 			});
+			return def.promise();
 		};
 		
 		self.allAttrs = ko.computed(function(){
@@ -134,12 +98,97 @@ var invoice = (function($) {
 		self.allAttrs.subscribe(function(){
 			self.save();
 		});
-	},
+	};
 	
-	addInvoice = function(){
-		var newInvoice = new InvoiceViewModel();
-		invoiceList.push(newInvoice);
-		return newInvoice;
+	InvoiceViewModel.prototype.populateLineItems = function() {
+		var self = this;
+		if( self.lineitems().length <= 0 ){
+			self.lineitemObjs.removeAll();
+			self.lineitemObjs.push(new lineitem.LineItemViewModel({invoice: self.url()}));
+		}
+		//TODO still have a problem when a new line item is created. It's not saved (and have a PK) until a description
+		// is entered. We have nothing to update the lineitems array with. And how to trigger that notification?
+		ko.utils.arrayForEach(self.lineitems(), function(uri) {
+			console.log("Calling GET for: " + uri);
+			$.getJSON(uri, function(data) {
+				var foundLi = ko.utils.arrayFirst(self.lineitemObjs(), function(item){
+					return item.url() === data.url;
+				});
+				if( foundLi ) {
+					foundLi.loadData(data);
+				}
+				else{
+					self.lineitemObjs.push(new lineitem.LineItemViewModel(data));
+				}
+			});
+		});
+	};
+		
+	InvoiceViewModel.prototype.toJSON = function(){
+		var copy = {
+			paid_date: this.paid_date(),
+			sent_date: this.sent_date(),
+			customer: this.customer(),
+			owner: this.owner()
+		};
+		return JSON.stringify(copy);
+	};
+	
+	InvoiceViewModel.prototype.loadData = function(serverData){
+		console.log("Loading data from server");
+		var self = this;
+		if( serverData === null || serverData === undefined )
+		{
+			return undefined;
+		}
+		
+		self.url = ko.observable(serverData.url || "");
+		self.invoice_date = ko.observable(serverData.invoice_date);
+		self.paid_date = ko.observable(serverData.paid_date || null);
+		self.sent_date = ko.observable(serverData.sent_date || null );
+		self.customer = ko.observable(serverData.customer);
+		self.owner = ko.observable(serverData.owner || "");
+		self.shorturl = ko.observable(serverData.shorturl || "");
+		self.first_name = ko.observable(serverData.first_name || "");
+		self.last_name = ko.observable(serverData.last_name || "");
+		self.street1 = ko.observable(serverData.street1 || "");
+		self.street2 = ko.observable(serverData.street2 || "");
+		self.city = ko.observable(serverData.city || "");
+		self.state = ko.observable(serverData.state || "");
+		self.zip_code = ko.observable(serverData.zip_code || "");
+		self.email = ko.observable(serverData.email || "");
+		self.phone = ko.observable(serverData.phone || "");
+		
+		self.cached_grand_total = ko.observable(serverData.grand_total || parseFloat("0").toFixed(2));
+		
+		if( serverData.hasOwnProperty('lineitems') ){
+			self.lineitems.removeAll();
+			$.each(serverData.lineitems, function(i,v){
+				self.lineitems.push(v);
+			});
+		}
+	};
+	
+	var addInvoice = function(customer){
+		var def = $.Deferred();
+		var postPayload = {
+			customer: customer,
+			owner: "http://invoices.aztechian.c9.io/api/users/1/"
+		};
+		$.ajax({
+			url: "/api/invoices/",
+			contentType: "application/json; charset=UTF-8",
+			data: JSON.stringify(postPayload),
+			type: "POST"
+		}).done(function(data){
+			var newInvoice = new InvoiceViewModel(data);
+			invoiceList.push(newInvoice);
+			def.resolve(newInvoice);
+		}).fail(function(jqXhr, statusText, status){
+			console.log(status);
+			def.reject(jqXhr);
+		});
+		return def.promise();
 	},
 
 	init = function() {
@@ -151,47 +200,25 @@ var invoice = (function($) {
 			$("#loading").hide();
 			displayMode('invoice-list');
 		});
-		
-		$(document).on('click', '#invoice-table tbody tr', function(event){
-			var invObj = ko.dataFor(this);
-			setInvoice(invoiceList.indexOf(invObj));
-		});
-		
-		$(document).on('click', '#done-btn, i.icon-level-up', function(event){
-			var doneInv = currentInvoice();
-			$.getJSON(doneInv.url(), function(data){
-				doneInv.cached_grand_total(data.grand_total);
-				doneInv.first_name(data.first_name);
-				doneInv.last_name(data.last_name);
-				doneInv.invoice_date(data.invoice_date);
-				doneInv.sent_date(data.sent_date);
-				doneInv.paid_date(data.paid_date);
-			});
-			setInvoice(undefined);
-		});
 	},
 
 	setInvoice = function(idx) {
-		if( idx === undefined ){
+		var i = -1; //idx === undefined will keep the -1 value
+		if ( typeof idx === 'object' ){
+			i = invoiceList.indexOf(idx);
+		}
+		else if (typeof idx === 'number' ){
+			i = idx;
+		}
+		
+		if( i < 0 ){
 			currentInvoice(undefined);
 			displayMode('invoice-list');
+			return undefined;
 		}
-		else{
-			console.log("Called setInvoice with " + idx);
-			currentInvoice(invoiceList()[idx]);
-			currentInvoice().populateLineItems();
-			displayMode('invoice-detail');
-		}
-	};
-	
-	InvoiceViewModel.prototype.toJSON = function(){
-		var copy = {
-			paid_date: this.paid_date(),
-			sent_date: this.sent_date(),
-			customer: this.customer(),
-			owner: this.owner()
-		};
-		return JSON.stringify(copy);
+		currentInvoice(invoiceList()[i]);
+		currentInvoice().populateLineItems();
+		displayMode('invoice-detail');
 	};
 
 	return {
