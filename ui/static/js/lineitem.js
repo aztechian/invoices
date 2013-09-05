@@ -66,8 +66,8 @@ var LineItem = (function($){
 			data: ko.toJSON(self),
 			type: ajaxType
 		}).done(function(data){
-			console.log("Saved lineitem." + self.pk());
 			self.loadData(data);
+			console.log("Saved lineitem." + self.pk());
 			def.resolve();
 		}).fail(function(jqXhr, statusText, status){
 			console.log(status);
@@ -95,7 +95,7 @@ var LineItem = (function($){
 		delete clone.pk;
 		delete clone.total;
 		delete clone.url;
-		return JSON.stringify(clone);
+		return clone;
 	};
 	
 	var init = function(){

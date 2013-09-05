@@ -125,13 +125,14 @@ var invoice = (function($) {
 	};
 		
 	InvoiceViewModel.prototype.toJSON = function(){
-		var copy = {
-			paid_date: this.paid_date(),
-			sent_date: this.sent_date(),
-			customer: this.customer(),
-			owner: this.owner()
+		var fullCopy = ko.toJS(this),
+		copy = {
+			paid_date: fullCopy.paid_date,
+			sent_date: fullCopy.sent_date,
+			customer: fullCopy.customer,
+			owner: fullCopy.owner
 		};
-		return JSON.stringify(copy);
+		return copy;
 	};
 	
 	InvoiceViewModel.prototype.loadData = function(serverData){
@@ -170,8 +171,8 @@ var invoice = (function($) {
 	};
 	
 	var addInvoice = function(customer){
-		var def = $.Deferred();
-		var postPayload = {
+		var def = $.Deferred(),
+		postPayload = {
 			customer: customer,
 			owner: "http://invoices.aztechian.c9.io/api/users/1/"
 		};
@@ -188,6 +189,26 @@ var invoice = (function($) {
 			console.log(status);
 			def.reject(jqXhr);
 		});
+		return def.promise();
+	},
+	
+	deleteInvoice = function(invoice){
+		var def = $.Deferred();
+		if( invoice === null || invoice === undefined || !invoice.url()){
+			def.reject({},{statusText: "No invoice given to deleteInvoice()"});
+		}
+		$.ajax({
+			url: invoice.url(),
+			contentType: "application/json; charset=UTF-8",
+			type: "DELETE"
+		}).done(function(data){
+			invoiceList.remove(invoice);
+			def.resolve();
+		}).fail(function(jqXhr, statusText, status){
+			console.log(JSON.stringify(status));
+			def.reject(jqXhr, status);
+		});
+		
 		return def.promise();
 	},
 
@@ -225,6 +246,7 @@ var invoice = (function($) {
 		init: init,
 		invoiceList: invoiceList,
 		addInvoice: addInvoice,
+		deleteInvoice: deleteInvoice,
 		InvoiceViewModel: InvoiceViewModel,
 		currentInvoice: currentInvoice,
 		setInvoice: setInvoice,

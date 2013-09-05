@@ -96,7 +96,7 @@
 		// $('#lineitem-list tbody').append($newrow);
 		// $newrow.find('a').editable();
 		// $newrow.show('slow', function() {
-		// 	$newrow.css('background', '');
+		// $newrow.css('background', '');
 		// });
 
 		// $('.recipient').editable({
@@ -132,10 +132,10 @@
 		// });
 	});
 
-	$(document).on('hidden', '#lineitem-list a', function(e, reason) {
+	$(document).on('hidden', '#lineitem-list span', function(e, reason) {
 		console.log("Editable hidden");
 		if (reason === 'save' || reason === 'nochange') {
-			var $next = $(this).closest('tr').next().find('.editable');
+			var $next = $(e.currentTarget).closest('tr').next().find('.editable');
 			setTimeout(function() {
 				$next.editable('show');
 			}, 300);
@@ -151,8 +151,12 @@
 	});
 	
 	$(document).on('keyup', function(event){
-		if( invoice.displayMode() === 'invoice-detail' )
+		if( invoice.displayMode() === 'invoice-detail' && 
+			event.keyCode === 27 )
 			returnFromDetail();
+		event.stopPropagation();
+		event.preventDefault();
+		return false;
 	});
 	
 	$(document).on('click', '#new-invoice', function(event){
@@ -193,6 +197,26 @@
 			$("#customer_chooser .modal-header").append($alert);
 			console.log("This failed miserably. What the hell were you thinking??" + JSON.stringify(status));
 		});
+		event.stopPropagation();
+		event.preventDefault();
+		return false;
+	});
+	
+	$(document).on('click', '#confirm_delete .modal-footer .btn-danger', function(event){
+		var toDel = invoice.currentInvoice(),
+		delPromise = invoice.deleteInvoice(toDel);
+		delPromise.done( function() {
+			$("#confirm_delete").modal("hide");
+			invoice.setInvoice();
+			toDel = null;
+		}).fail(function(jqXhr, status){
+			var $alert = $(document.getElementById("alert-template").innerHTML);
+			$alert.append("Unable to delete invoice: " + status.statusCode + ", " + status.statusText);
+			$("#customer_chooser .modal-header").append($alert);
+		});
+		event.stopPropagation();
+		event.preventDefault();
+		return false;
 	});
 	
 	$(document).on('click', '#invoice-table #paid-icon', function(event){
@@ -201,6 +225,17 @@
 			elem.paid_date(new Date());
 		else
 			elem.paid_date(null);
+		event.stopPropagation();
+		event.preventDefault();
+		return false;
+	});
+		
+	$(document).on('click', '#invoice-table #sent-icon', function(event){
+		var elem = ko.dataFor(this);
+		if( elem.sent_date() === null )
+			elem.sent_date(new Date());
+		else
+			elem.sent_date(null);
 		event.stopPropagation();
 		event.preventDefault();
 		return false;
@@ -219,14 +254,14 @@
 <script type="text/html" id="invoice-detail">
 	<div class="invoice-body" data-bind="with: currentInvoice">
 		<div class="row-fluid">
-			<div class="pull-right invoice-id" data-bind="text: 'Invoice #' + pk()"></div>
+			<div class="pull-right invoice-id" data-bind="text: pk"></div>
 		</div>
 	<form id="lineitem-form">
 		<div class="row-fluid">
 			<div class="span3 sender address">
 				<p>Mark
-					<br>123 Main St
-					<br>Anytown, USA 12345</p>
+				<br>123 Main St
+				<br>Anytown, USA 12345</p>
 			</div>
 			<div class="span3 pull-right recipient address">
 				<div data-bind="text: full_name"></div>
@@ -269,7 +304,21 @@
 		<p class="totalLabel">Grand Total: <span class="total currency" data-bind="text: grand_total"></span> </p>
 	</div>
 </div>
-<button type="button" id="done-btn" class="btn btn-primary pull-right" style="margin: 4px;">Done</button>
+<a role="button" href="#confirm_delete" data-toggle="modal" class="btn btn-danger pull-right" style="margin: 4px;">Delete</a>
+
+<div id="confirm_delete" class="modal hide fade" data-bind="with: currentInvoice">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>Confirm deletion of Invoice #<span data-bind="text: pk"></span></h3>
+	</div>
+	<!--<div class="modal-body" style="text-align: center;">
+		
+	</div>-->
+	<div class="modal-footer">
+		<a href="#" class="btn" data-dismiss="modal">Cancel</a>
+		<a href="#" class="btn btn-danger">Delete Invoice</a>
+	</div>
+</div>
 </script>
 
 <script type="text/html" id="invoice-list">
@@ -302,14 +351,15 @@
 	</table>
 	<a href="#" id="new-invoice"><i style="padding-top: 8px;" class="icon-plus-sign icon-large pull-left"> Add Invoice</i></a>
 
-	<div id="customer_chooser" class="modal hide fade">
+<div id="customer_chooser" class="modal hide fade">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		<h3>Select Customer</h3>
 	</div>
 	<div class="modal-body" style="text-align: center;">
-		<label>Customer: </label>
-		<input type="hidden" name="customer" id="selectbox-o" class="input-xlarge" />
+		<label>Customer:</label>
+		<input type="hidden" name="customer" id="selectbox-o"
+		class="input-xlarge" />
 	</div>
 	<div class="modal-footer">
 		<a href="#" class="btn" data-dismiss="modal">Cancel</a>
