@@ -5,6 +5,12 @@ var LineItem = (function($){
 	var zeroPrice = parseFloat("0", 10).toFixed(2),
 	LineItemViewModel = function(serverData){
 		var self = this;
+		self.description = ko.observable(serverData.description || "");
+		self.taxable = ko.observable(serverData.taxable || false);
+		self.unit_price = ko.observable(serverData.unit_price || zeroPrice);
+		self.quantity = ko.observable(serverData.quantity || 1);
+		self.invoice = ko.observable(serverData.invoice);
+		self.url = ko.observable(serverData.url || "");
 		self.loadData(serverData);
 		
 		self.total = ko.computed(function(){
@@ -77,16 +83,19 @@ var LineItem = (function($){
 	};
 	
 	LineItemViewModel.prototype.loadData = function(serverData){
+		if( typeof(serverData) !== 'object' || !serverData.hasOwnProperty("invoice") ){
+			throw "Must provide an object with at least a property of 'invoice' to create a LineItem";
+		}
 		var self = this;
-		self.description = ko.observable(serverData.description || "");
-		self.taxable = ko.observable(serverData.taxable || false);
-		self.unit_price = ko.observable(serverData.unit_price || zeroPrice);
-		self.quantity = ko.observable(serverData.quantity || 1);
-		self.invoice = ko.observable(serverData.invoice);
-		self.url = ko.observable(serverData.url || "");
+		self.description(serverData.description || "");
+		self.taxable(serverData.taxable || false);
+		self.unit_price(serverData.unit_price || zeroPrice);
+		self.quantity(serverData.quantity || 1);
+		self.invoice(serverData.invoice);
+		self.url(serverData.url || "");
 	};
 
-	LineItem.prototype.toJSON = function(){
+	LineItemViewModel.prototype.toJSON = function(){
 		var clone = ko.toJS(this);
 		delete clone.save;
 		delete clone.view_unit_price;
@@ -96,6 +105,16 @@ var LineItem = (function($){
 		delete clone.total;
 		delete clone.url;
 		return clone;
+	};
+	
+	LineItemViewModel.prototype.load = function(){
+		var self = this;
+		if( self.url() !== null && self.url() !== undefined ){
+			console.log("Loading line item " + self.pk() + " from server");
+			$.getJSON(self.url(), function(data){
+				self.loadData(data);
+			});
+		}
 	};
 	
 	var init = function(){

@@ -11,7 +11,7 @@ var invoice = (function($) {
 		var self = this;
 		
 		self.lineitems = ko.observableArray();
-		self.lineitemObjs = ko.observableArray();
+		// self.lineitemObjs = ko.observableArray();
 		self.loadData(serverData);
 		self.pk = ko.computed(function(){
 			if( self.url() === "" || self.url() === undefined )
@@ -26,10 +26,10 @@ var invoice = (function($) {
 		self.grand_total = ko.computed(function(){
 			var gTotal = 0.0,
 			taxableTotal = 0.0;
-			if( self.lineitemObjs().length <= 0 )
+			if( self.lineitems().length <= 0 )
 				return parseFloat(self.cached_grand_total()).toFixed(2);
 			
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				if( lineitem.taxable() )
 					taxableTotal += parseFloat(lineitem.total());
 				else
@@ -41,7 +41,7 @@ var invoice = (function($) {
 		
 		self.taxable_total = ko.computed(function(){
 			var total = 0.0;
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				if( lineitem.taxable() )
 					total += parseFloat(lineitem.total());
 			});
@@ -50,7 +50,7 @@ var invoice = (function($) {
 		
 		self.total_tax = ko.computed(function(){
 			var total = 0.0;
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				if( lineitem.taxable() )
 					total += parseFloat(lineitem.total());
 			});
@@ -59,16 +59,11 @@ var invoice = (function($) {
 		
 		self.sub_total = ko.computed(function(){
 			var total = 0.0;
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				total += parseFloat(lineitem.total());
 			});
 			return total.toFixed(2);
 		});
-		
-		self.addLineItem = function(){
-			self.lineitemObjs.push(new lineitem.LineItemViewModel());
-			self.lineitems.push("");
-		};
 		
 		self.save = function(){
 			var def = $.Deferred();
@@ -100,28 +95,22 @@ var invoice = (function($) {
 		});
 	};
 	
-	InvoiceViewModel.prototype.populateLineItems = function() {
+	InvoiceViewModel.prototype.addLineItem = function(){
 		var self = this;
-		if( self.lineitems().length <= 0 ){
-			self.lineitemObjs.removeAll();
-			self.lineitemObjs.push(new lineitem.LineItemViewModel({invoice: self.url()}));
-		}
-		//TODO still have a problem when a new line item is created. It's not saved (and have a PK) until a description
-		// is entered. We have nothing to update the lineitems array with. And how to trigger that notification?
-		ko.utils.arrayForEach(self.lineitems(), function(uri) {
-			console.log("Calling GET for: " + uri);
-			$.getJSON(uri, function(data) {
-				var foundLi = ko.utils.arrayFirst(self.lineitemObjs(), function(item){
-					return item.url() === data.url;
-				});
-				if( foundLi ) {
-					foundLi.loadData(data);
-				}
-				else{
-					self.lineitemObjs.push(new lineitem.LineItemViewModel(data));
-				}
-			});
+		self.lineitems.push(new lineitem.LineItemViewModel({invoice: self.url()}));
+	};
+	
+	InvoiceViewModel.prototype.populateLineItems = function() {
+		var self = this,
+		needsNext = true;
+		console.log("Populating line items for invoice " + self.pk());
+		ko.utils.arrayForEach(self.lineitems(), function(liObj) {
+			if( liObj.url() === '' || liObj.url() === undefined )
+				needsNext = false;
+			liObj.load();
 		});
+		if( needsNext )
+			self.addLineItem();
 	};
 		
 	InvoiceViewModel.prototype.toJSON = function(){
@@ -165,7 +154,8 @@ var invoice = (function($) {
 		if( serverData.hasOwnProperty('lineitems') ){
 			self.lineitems.removeAll();
 			$.each(serverData.lineitems, function(i,v){
-				self.lineitems.push(v);
+				self.lineitems.push(new lineitem.LineItemViewModel({url: v, invoice: self.url()}));
+				// self.lineitems.push(v);
 			});
 		}
 	};
