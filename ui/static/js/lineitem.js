@@ -53,7 +53,10 @@ var LineItem = (function($){
 		}).extend( { throttle: 500 });
 		
 		self.allAttrs.subscribe(function(){
-			self.save();
+			var promise = self.save();
+			promise.done(function(data){
+				
+			});
 		});
 	};
 	
@@ -62,7 +65,7 @@ var LineItem = (function($){
 		if( self.invoice() === "" || self.invoice() === undefined || 
 			self.description() === "" || self.description() === undefined ||
 			self.unit_price() === undefined ){
-			return false;
+			return undefined;
 		}
 		var def = $.Deferred(),
 		ajaxType = (self.pk() > 0) ? "PUT" : "POST";

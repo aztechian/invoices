@@ -96,8 +96,17 @@ var invoice = (function($) {
 	};
 	
 	InvoiceViewModel.prototype.addLineItem = function(){
-		var self = this;
-		self.lineitems.push(new lineitem.LineItemViewModel({invoice: self.url()}));
+		var self = this,
+		newLI = new lineitem.LineItemViewModel({invoice: self.url()});
+		self.lineitems.push(newLI);
+		//Slightly recursive, but this allows creating an additional line item for th invoice when
+		//a previous one is saved (which causes the PK field to update)
+		var subscription = newLI.pk.subscribe(function(newValue){
+			if( String(newValue).search(/lineitem/) ){
+				self.addLineItem();
+				subscription.dispose();
+			}
+		});
 	};
 	
 	InvoiceViewModel.prototype.populateLineItems = function() {
