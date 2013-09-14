@@ -95,6 +95,8 @@ class Invoice(models.Model):
 		
 		if self.pk is None:
 			linked_customer = self.customer
+			self.first_name = linked_customer.first_name
+			self.last_name = linked_customer.last_name
 			self.street1 = linked_customer.street1
 			self.street2 = linked_customer.street2
 			self.city = linked_customer.city
