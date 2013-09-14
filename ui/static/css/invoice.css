@@ -30,6 +30,10 @@
 	box-shadow:         inset 0 0 10px #000000;
 }
 
+i.icon-level-up:hover {
+	cursor: pointer;
+}
+
 .customer_thead div {
 	padding: 8px;
 	margin: 4px;
@@ -84,8 +88,21 @@
 	margin: 10px 0 10px 10px;
 }
 
+.invoice-id:before {
+	content: 'Invoice #';
+}
+
+#invoice-table tr:hover {
+	cursor: pointer;
+}
+
 .currency:before {
     content: '$';
+}
+
+.totalbox .total {
+	float: right;
+	min-width: 75px;
 }
 
 tbody td {

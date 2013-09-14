@@ -4,65 +4,17 @@ var invoice = (function($) {
 	var invoiceList = ko.observableArray(),
 	currentInvoice = ko.observable(),
 	TAX_RATE = 1.0675,
+	queryType = "all",
+	displayMode = ko.observable('loading'),
 	
 	InvoiceViewModel = function(serverData){
 		var self = this;
 		
-		self.populateLineItems = function(){
-			ko.utils.arrayForEach(self.lineitems(), function(uri){
-				console.log("Calling GET for: " + uri);
-				$.getJSON(uri, function(data){
-					self.lineitemObjs.push(new lineitem.LineItemViewModel(data));
-				});
-			});
-		};
-		
 		self.lineitems = ko.observableArray();
-		self.lineitemObjs = ko.observableArray();
-		if( serverData !== null && serverData !== undefined ){
-			self.url = ko.observable(serverData.url);
-			self.invoice_date = ko.observable(serverData.invoice_date);
-			self.paid_date = ko.observable(serverData.paid_date);
-			self.sent_date = ko.observable(serverData.sent_date);
-			self.customer = ko.observable(serverData.customer);
-			self.owner = ko.observable(serverData.owner);
-			self.shorturl = ko.observable(serverData.shorturl);
-			self.first_name = ko.observable(serverData.first_name);
-			self.last_name = ko.observable(serverData.last_name);
-			self.street1 = ko.observable(serverData.street1);
-			self.street2 = ko.observable(serverData.street2);
-			self.city = ko.observable(serverData.city);
-			self.state = ko.observable(serverData.state);
-			self.zip_code = ko.observable(serverData.zip_code);
-			self.email = ko.observable(serverData.email);
-			self.phone = ko.observable(serverData.phone);
-			
-			$.each(serverData.lineitems, function(i,v){
-				var relUrl = $('<a/>').attr('href',v)[0].pathname.replace(/^[^\/]/,'/');
-				self.lineitems.push(relUrl);
-			});
-		}
-		else {
-			self.url = ko.observable("");
-			self.invoice_date = ko.observable("");
-			self.paid_date = ko.observable("");
-			self.sent_date = ko.observable("");
-			self.customer = ko.observable("");
-			self.owner = ko.observable("");
-			self.shorturl = ko.observable("");
-			self.first_name = ko.observable("");
-			self.last_name = ko.observable("");
-			self.street1 = ko.observable("");
-			self.street2 = ko.observable("");
-			self.city = ko.observable("");
-			self.state = ko.observable("");
-			self.zip_code = ko.observable("");
-			self.email = ko.observable("");
-			self.phone = ko.observable("");
-		}
-	
+		// self.lineitemObjs = ko.observableArray();
+		self.loadData(serverData);
 		self.pk = ko.computed(function(){
-			if( self.url() === "" )
+			if( self.url() === "" || self.url() === undefined )
 				return -1;
 			return parseInt(self.url().split('/').slice(-2,-1), 10);
 		});
@@ -74,7 +26,10 @@ var invoice = (function($) {
 		self.grand_total = ko.computed(function(){
 			var gTotal = 0.0,
 			taxableTotal = 0.0;
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			if( self.lineitems().length <= 0 )
+				return parseFloat(self.cached_grand_total()).toFixed(2);
+			
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				if( lineitem.taxable() )
 					taxableTotal += parseFloat(lineitem.total());
 				else
@@ -86,7 +41,7 @@ var invoice = (function($) {
 		
 		self.taxable_total = ko.computed(function(){
 			var total = 0.0;
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				if( lineitem.taxable() )
 					total += parseFloat(lineitem.total());
 			});
@@ -95,7 +50,7 @@ var invoice = (function($) {
 		
 		self.total_tax = ko.computed(function(){
 			var total = 0.0;
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				if( lineitem.taxable() )
 					total += parseFloat(lineitem.total());
 			});
@@ -104,17 +59,156 @@ var invoice = (function($) {
 		
 		self.sub_total = ko.computed(function(){
 			var total = 0.0;
-			ko.utils.arrayForEach(self.lineitemObjs(), function(lineitem){
+			ko.utils.arrayForEach(self.lineitems(), function(lineitem){
 				total += parseFloat(lineitem.total());
 			});
 			return total.toFixed(2);
 		});
+		
+		self.save = function(){
+			var def = $.Deferred();
+			$.ajax({
+				url: self.url(),
+				contentType: "application/json; charset=UTF-8",
+				data: ko.toJSON(self),
+				type: "PUT"
+			}).done(function(data){
+				console.log("Saved.");
+				def.resolve();
+			}).fail(function(jqXhr, statusText, status){
+				console.log(status);
+				def.reject(jqXhr, status);
+			});
+			return def.promise();
+		};
+		
+		self.allAttrs = ko.computed(function(){
+			self.invoice_date();
+			self.sent_date();
+			self.paid_date();
+			self.customer();
+			self.owner();
+		}).extend( { throttle: 500 });
+		
+		self.allAttrs.subscribe(function(){
+			self.save();
+		});
+	};
+	
+	InvoiceViewModel.prototype.addLineItem = function(){
+		var self = this,
+		newLI = new lineitem.LineItemViewModel({invoice: self.url()});
+		self.lineitems.push(newLI);
+		//Slightly recursive, but this allows creating an additional line item for th invoice when
+		//a previous one is saved (which causes the PK field to update)
+		var subscription = newLI.pk.subscribe(function(newValue){
+			if( String(newValue).search(/lineitem/) ){
+				self.addLineItem();
+				subscription.dispose();
+			}
+		});
+	};
+	
+	InvoiceViewModel.prototype.populateLineItems = function() {
+		var self = this,
+		needsNext = true;
+		console.log("Populating line items for invoice " + self.pk());
+		ko.utils.arrayForEach(self.lineitems(), function(liObj) {
+			if( liObj.url() === '' || liObj.url() === undefined )
+				needsNext = false;
+			liObj.load();
+		});
+		if( needsNext )
+			self.addLineItem();
+	};
+		
+	InvoiceViewModel.prototype.toJSON = function(){
+		var fullCopy = ko.toJS(this),
+		copy = {
+			paid_date: fullCopy.paid_date,
+			sent_date: fullCopy.sent_date,
+			customer: fullCopy.customer,
+			owner: fullCopy.owner
+		};
+		return copy;
+	};
+	
+	InvoiceViewModel.prototype.loadData = function(serverData){
+		console.log("Loading data from server");
+		var self = this;
+		if( serverData === null || serverData === undefined )
+		{
+			return undefined;
+		}
+		
+		self.url = ko.observable(serverData.url || "");
+		self.invoice_date = ko.observable(serverData.invoice_date);
+		self.paid_date = ko.observable(serverData.paid_date || null);
+		self.sent_date = ko.observable(serverData.sent_date || null );
+		self.customer = ko.observable(serverData.customer);
+		self.owner = ko.observable(serverData.owner || "");
+		self.shorturl = ko.observable(serverData.shorturl || "");
+		self.first_name = ko.observable(serverData.first_name || "");
+		self.last_name = ko.observable(serverData.last_name || "");
+		self.street1 = ko.observable(serverData.street1 || "");
+		self.street2 = ko.observable(serverData.street2 || "");
+		self.city = ko.observable(serverData.city || "");
+		self.state = ko.observable(serverData.state || "");
+		self.zip_code = ko.observable(serverData.zip_code || "");
+		self.email = ko.observable(serverData.email || "");
+		self.phone = ko.observable(serverData.phone || "");
+		
+		self.cached_grand_total = ko.observable(serverData.grand_total || parseFloat("0").toFixed(2));
+		
+		if( serverData.hasOwnProperty('lineitems') ){
+			self.lineitems.removeAll();
+			$.each(serverData.lineitems, function(i,v){
+				self.lineitems.push(new lineitem.LineItemViewModel({url: v, invoice: self.url()}));
+				// self.lineitems.push(v);
+			});
+		}
+	};
+	
+	var addInvoice = function(customer){
+		var def = $.Deferred(),
+		postPayload = {
+			customer: customer,
+			owner: "http://invoices.aztechian.c9.io/api/users/1/"
+		};
+		$.ajax({
+			url: "/api/invoices/",
+			contentType: "application/json; charset=UTF-8",
+			data: JSON.stringify(postPayload),
+			type: "POST"
+		}).done(function(data){
+			var newInvoice = new InvoiceViewModel(data);
+			invoiceList.push(newInvoice);
+			def.resolve(newInvoice);
+		}).fail(function(jqXhr, statusText, status){
+			console.log(status);
+			def.reject(jqXhr);
+		});
+		return def.promise();
 	},
 	
-	addInvoice = function(){
-		var newInvoice = new InvoiceViewModel();
-		invoiceList.push(newInvoice);
-		return newInvoice;
+	deleteInvoice = function(invoice){
+		var def = $.Deferred();
+		if( invoice === null || invoice === undefined || !invoice.url()){
+			def.reject({},{statusText: "No invoice given to deleteInvoice()"});
+		}
+		$.ajax({
+			url: invoice.url(),
+			contentType: "application/json; charset=UTF-8",
+			type: "DELETE"
+		}).done(function(data){
+			invoiceList.remove(invoice);
+			def.resolve();
+		}).fail(function(jqXhr, statusText, status){
+			console.log(JSON.stringify(status));
+			def.reject(jqXhr, status);
+		});
+		
+		return def.promise();
 	},
 
 	init = function() {
@@ -123,23 +217,40 @@ var invoice = (function($) {
 				var inv = new InvoiceViewModel(val);
 				invoiceList.push(inv);
 			});
-			setInvoice(0);
+			$("#loading").hide();
+			displayMode('invoice-list');
 		});
 	},
 
 	setInvoice = function(idx) {
-		console.log("Called setInvoice with " + idx);
-		currentInvoice(invoiceList()[idx]);
+		var i = -1; //idx === undefined will keep the -1 value
+		if ( typeof idx === 'object' ){
+			i = invoiceList.indexOf(idx);
+		}
+		else if (typeof idx === 'number' ){
+			i = idx;
+		}
+		
+		if( i < 0 ){
+			currentInvoice(undefined);
+			displayMode('invoice-list');
+			return undefined;
+		}
+		currentInvoice(invoiceList()[i]);
 		currentInvoice().populateLineItems();
+		displayMode('invoice-detail');
 	};
 
 	return {
 		init: init,
 		invoiceList: invoiceList,
 		addInvoice: addInvoice,
+		deleteInvoice: deleteInvoice,
 		InvoiceViewModel: InvoiceViewModel,
 		currentInvoice: currentInvoice,
-		setInvoice: setInvoice
+		setInvoice: setInvoice,
+		displayMode: displayMode,
+		queryType: queryType
 	};
 })(jQuery);
 invoice.init();

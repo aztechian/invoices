@@ -96,16 +96,15 @@
 				{% endblock footer-content %}
 			</div>
 		</div>
+		<!-- Put the template HTML above JS so that the templates exist in the DOM when JS is called -->
+		{% block hidden-html %}	
+		{% endblock hidden-html %}
 		<!-- JS Here -->
 		{% block javascript %}
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.4.5/bootstrap-editable/js/bootstrap-editable.min.js"></script>
 		{% endblock javascript %}
-		
-		<script id="templates" type="text/html">
-		{% block hidden-html %}	
-		{% endblock hidden-html %}
-		</script>
+
 	</body>
 </html>
