@@ -1,0 +1,64 @@
+{% extends 'ui/base.html' %}
+
+{% block title-addendum %} - Login{% endblock title-addendum %}
+
+
+{% block main-content %}
+<div class="hero-unit">
+	<form class="form-horizontal" action="/login/" method="POST">
+		{% csrf_token %}
+		<div class="control-group">
+			<label class="control-label" for="login-user">Username</label>
+			<div class="controls">
+				<input type="text" id="login-user" name="username" placeholder="Username">
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="inputPassword">Password</label>
+			<div class="controls">
+				<input type="password" id="login-password" name="password" placeholder="Password">
+			</div>
+		</div>
+		<div class="control-group">
+			<div class="controls">
+				<label class="checkbox">
+					<input type="checkbox"> Remember me
+				</label>
+				<button type="submit" class="btn btn-primary">Sign in</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+{% endblock main-content %}
+
+{% block sidenav %}
+	<ul class="nav nav-pills nav-stacked">
+		<li class="active">
+			<a href="/login">Login</a>
+		</li>
+	</ul>
+{% endblock sidenav %}
+
+{% block tip-content %}
+	<p><b>Tip:</b>You can log in from the user menu in the upper right corner.</p>
+{% endblock tip-content %}
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+	$('#nav_home').addClass('active');
+	$().ready(function() {
+		$("form #login-user").focus();
+	});
+	$(document).on("click", "form.form-horizontal button", function(event){
+		if( $("#login-user").val() === '' && $("#login-password").val() === '' )
+			return false;
+		var u = $("#login-user").val(),
+		p = $("#login-password").val();
+		$.post('/login/', {username: u, password: p}, function(data){
+			console.log(data);
+		});
+	});
+</script>
+{% endblock javascript %}

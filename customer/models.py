@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django_localflavor_us.us_states import STATE_CHOICES
 from django_localflavor_us.models import USPostalCodeField, PhoneNumberField
+
 
 class Customer(User):
 	#inheriting all fields from auth.User too
@@ -11,4 +11,3 @@ class Customer(User):
 	state = USPostalCodeField(blank=True)
 	zip_code = models.CharField(max_length=10, verbose_name="Zip Code")
 	phone = PhoneNumberField()
-	

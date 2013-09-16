@@ -2,6 +2,7 @@ from invoice.models import Invoice
 from invoice.serializers import InvoiceSerializer
 from rest_framework import viewsets, filters
 
+
 class InvoiceViewSet(viewsets.ModelViewSet):
 	serializer_class = InvoiceSerializer
 	model = Invoice
