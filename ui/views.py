@@ -2,6 +2,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.core.urlresolvers import reverse
+from json import dumps
 
 
 class LandingPageView(TemplateView):
@@ -27,12 +28,18 @@ class LoginView(TemplateView):
 		if user is not None:
 			if user.is_active:
 				login(request, user)
-				return HttpResponseRedirect('/')
+				if request.is_ajax():
+					data = {}
+					data.first_name = user.first_name
+					data.username = user.username
+					return HttpResponse(content=dumps(data), content_type="application/json; charset=UTF-8", status=200)
+				else:
+					return HttpResponseRedirect(reverse('ui:ui-index'))
 			else:
 				return HttpResponseForbidden()
 		else:
 			return HttpResponse(status=401)
 
 
-# class LogoutView(View):
-	# def get
+class SignupView(TemplateView):
+	template_name = 'ui/signup.html'

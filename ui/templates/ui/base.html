@@ -1,4 +1,5 @@
 <!doctype html>
+{% load staticfiles %}
 <html lang="en-US">
 <head>
 	<meta charset="UTF-8"/>
@@ -74,7 +75,7 @@
 										<label class="checkbox">
 											<input type="checkbox"> Remember me
 										</label>
-										<button type="submit" class="btn btn-success">Sign in</button>
+										<button id="login-btn" type="button" class="btn btn-success">Sign in</button>
 									</div>
 								</div>
 							</form>
@@ -138,6 +139,7 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.4.5/bootstrap-editable/js/bootstrap-editable.min.js"></script>
+		<script type="text/javascript" src="{% static 'js/utils.js' %}"></script>
 		{% endblock javascript %}
 
 	</body>

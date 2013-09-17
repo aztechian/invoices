@@ -20,7 +20,7 @@
 
 {% block sidenav %}
 	<ul class="nav nav-pills nav-stacked">
-		<li>
+		<li class="active">
 			<a href="#">All</a>
 		</li>
 		<li>
@@ -34,7 +34,7 @@
 		</li>
 	</ul>
 {% endblock sidenav %}
-					
+
 {% block main-content %}
 <!-- ko template: displayMode --><!-- /ko -->
 
@@ -48,7 +48,7 @@
 	<script type="text/javascript" src="{% static 'js/knockout.x-editable.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lineitem.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/invoice.js' %}"></script>
-	
+
 	<script type="text/javascript">
 	/*global ko, $, invoice, lineitem, moment */
 	'use strict';
@@ -57,21 +57,21 @@
 	$.fn.editable.defaults.onblur = 'submit';
 	$.fn.editable.defaults.send = 'always';
 	$('#nav_invoices').addClass('active');
-	
+
 	var customer2Typeahead = function(parsedResponse){
 		console.log("Filtering " + parsedResponse);
 		var datumArray=[];
 		$.each(parsedResponse, function(i, v) {
 			var datum= {
-				value: v.first_name +" " + v.last_name, 
-				tokens:[v.first_name, v.last_name, v.username], 
+				value: v.first_name +" " + v.last_name,
+				tokens:[v.first_name, v.last_name, v.username],
 				name: v.url
 			};
 			datumArray.push(datum);
 		});
 		return datumArray;
 	},
-	
+
 	returnFromDetail = function(){
 		var doneInv = invoice.currentInvoice();
 		$.getJSON(doneInv.url(), function(data){
@@ -84,7 +84,7 @@
 			invoice.setInvoice();
 		});
 	};
-	
+
 	$().ready(function() {
 		$("#lineitem-list a").editable();
 
@@ -141,24 +141,24 @@
 			}, 300);
 		}
 	});
-	
+
 	$(document).on('click', '#invoice-table tbody tr', function(event){
 		invoice.setInvoice(ko.dataFor(this));
 	});
-		
+
 	$(document).on('click', '#done-btn, i.icon-level-up', function(event){
 		returnFromDetail();
 	});
-	
+
 	$(document).on('keyup', function(event){
-		if( invoice.displayMode() === 'invoice-detail' && 
+		if( invoice.displayMode() === 'invoice-detail' &&
 			event.keyCode === 27 )
 			returnFromDetail();
 		event.stopPropagation();
 		event.preventDefault();
 		return false;
 	});
-	
+
 	$(document).on('click', '#new-invoice', function(event){
 		$("#customer_chooser").modal("show");
 		//This doesn't really have to wait for completion of the modal(show), because
@@ -184,7 +184,7 @@
 			}
 		});
 	});
-	
+
 	$(document).on('click', '#customer_chooser .modal-footer .btn-primary', function(event){
 		var invPromise = invoice.addInvoice( $("#selectbox-o").val() );
 		invPromise.done( function(newInvoice){
@@ -201,7 +201,7 @@
 		event.preventDefault();
 		return false;
 	});
-	
+
 	$(document).on('click', '#confirm_delete .modal-footer .btn-danger', function(event){
 		var toDel = invoice.currentInvoice(),
 		delPromise = invoice.deleteInvoice(toDel);
@@ -218,7 +218,7 @@
 		event.preventDefault();
 		return false;
 	});
-	
+
 	$(document).on('click', '#invoice-table #paid-icon', function(event){
 		var elem = ko.dataFor(this);
 		if( elem.paid_date() === null )
@@ -229,7 +229,7 @@
 		event.preventDefault();
 		return false;
 	});
-		
+
 	$(document).on('click', '#invoice-table #sent-icon', function(event){
 		var elem = ko.dataFor(this);
 		if( elem.sent_date() === null )
@@ -240,7 +240,7 @@
 		event.preventDefault();
 		return false;
 	});
-	
+
 	ko.applyBindings(invoice);
 	</script>
 {% endblock javascript %}
@@ -312,7 +312,7 @@
 		<h3>Confirm deletion of Invoice #<span data-bind="text: pk"></span></h3>
 	</div>
 	<!--<div class="modal-body" style="text-align: center;">
-		
+
 	</div>-->
 	<div class="modal-footer">
 		<a href="#" class="btn" data-dismiss="modal">Cancel</a>
