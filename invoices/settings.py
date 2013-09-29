@@ -106,7 +106,13 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'invoices.urls'
+LOGIN_URL = 'ui:ui-login'
+LOGIN_REDIRECT_URL = 'ui:ui-index'
 USE_X_FORWARDED_HOST = True
+
+REST_FRAMEWORK = {
+	'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.SessionAuthentication',)
+}
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'invoices.wsgi.application'

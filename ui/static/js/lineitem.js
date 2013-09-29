@@ -61,14 +61,17 @@ var LineItem = (function($){
 	};
 	
 	LineItemViewModel.prototype.save = function(){
-		var self = this;
+		var self = this,
+		def = $.Deferred();
+		
 		if( self.invoice() === "" || self.invoice() === undefined || 
 			self.description() === "" || self.description() === undefined ||
 			self.unit_price() === undefined ){
-			return undefined;
+			def.reject();
+			return def.promise();
 		}
-		var def = $.Deferred(),
-		ajaxType = (self.pk() > 0) ? "PUT" : "POST";
+		
+		var ajaxType = (self.pk() > 0) ? "PUT" : "POST";
 		$.ajax({
 			url: (self.pk() > 0) ? self.url() :'/api/lineitems/',
 			contentType: "application/json; charset=UTF-8",

@@ -5,6 +5,12 @@
 
 {% block main-content %}
 <div class="hero-unit">
+	{% if form.errors %}
+	<div class="alert alert-error">
+		<button type="button" class="close" data-dismiss="alert alert-error">&times;</button>
+		<strong>Unknown user name or password.</strong>
+	</div>
+	{% endif %}
 	<form class="form-horizontal" action="/login/" method="POST">
 		{% csrf_token %}
 		<div class="control-group">

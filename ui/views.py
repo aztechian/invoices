@@ -1,4 +1,4 @@
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.core.urlresolvers import reverse
@@ -17,28 +17,32 @@ class CustomerView(TemplateView):
 	template_name = 'ui/customer.html'
 
 
-class LoginView(TemplateView):
-	template_name = 'ui/login.html'
-
+class AjaxLoginView(View):
+	http_method_names = ['get','post']
+	
+	def get(self, request, *args, **kwargs):
+		return HttpResponseRedirect(reverse('ui:ui-login'))
+	
 	def post(self, request, *args, **kwargs):
 		username = request.POST['username']
 		password = request.POST['password']
 
 		user = authenticate(username = username, password = password)
+		data = {}
 		if user is not None:
 			if user.is_active:
 				login(request, user)
-				if request.is_ajax():
-					data = {}
-					data.first_name = user.first_name
-					data.username = user.username
-					return HttpResponse(content=dumps(data), content_type="application/json; charset=UTF-8", status=200)
-				else:
-					return HttpResponseRedirect(reverse('ui:ui-index'))
+				data.first_name = user.first_name
+				data.username = user.username
+				data.status = True
+				return HttpResponse(content=dumps(data), content_type="application/json; charset=UTF-8", status=200)
 			else:
-				return HttpResponseForbidden()
+				data.status = False
+				data.reason = "Your account is not yet active. Please, check your email first."
 		else:
-			return HttpResponse(status=401)
+			data.status = False
+			data.reason = "Invalid username or password"
+			return HttpResponse(content=dumps(data), content_type="application/json; charset=UTF-8", status=403)
 
 
 class SignupView(TemplateView):

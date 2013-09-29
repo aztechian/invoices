@@ -3,7 +3,7 @@
 var Utilities = (function($){
 	var login = function(user, password){
 		var def = $.Deferred();
-		$.post('/login/', {username: user, password: password}, function(data){
+		$.post('/login', {username: user, password: password}, function(data){
 			$(".navbar-inner li.dropdown").text(data.first_name);
 		});
 	},
