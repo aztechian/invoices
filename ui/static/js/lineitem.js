@@ -76,7 +76,10 @@ var LineItem = (function($){
 			url: (self.pk() > 0) ? self.url() :'/api/lineitems/',
 			contentType: "application/json; charset=UTF-8",
 			data: ko.toJSON(self),
-			type: ajaxType
+			type: ajaxType,
+			beforeSend: function(xhr, settings){
+				xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
+			}
 		}).done(function(data){
 			self.loadData(data);
 			console.log("Saved lineitem." + self.pk());

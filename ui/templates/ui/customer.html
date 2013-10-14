@@ -126,6 +126,9 @@
 					dataType: 'json',
 					data: JSON.stringify(toSubmit),
 					type: 'POST',
+					beforeSend: function(xhr, settings){
+						xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
+					},
 					contentType: 'application/json; charset=UTF-8'
 				}).done(function(data, textStatus, jqXhr){
 					var tempPk = parseInt(data.url.split('/').slice(-2,-1)[0], 10);
