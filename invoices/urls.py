@@ -13,16 +13,7 @@ router.register(r'permissions', PermissionViewSet)
 router.register(r'users', UserViewSet)
 
 urlpatterns = patterns('',
-	# Examples:
-	# url(r'^$', 'invoices.views.home', name='home'),
-	# url(r'^invoices/', include('invoices.foo.urls')),
-
-	# Uncomment the admin/doc line below to enable admin documentation:
-	# url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-	# Uncomment the next line to enable the admin:
-	# url(r'^admin/', include(admin.site.urls)),
-
 	url(r'^api/', include(router.urls)),
+	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 	url(r'^', include('ui.urls', namespace="ui"))
 )
