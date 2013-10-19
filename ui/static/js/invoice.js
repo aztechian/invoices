@@ -81,6 +81,12 @@ var invoice = (function($) {
 			});
 			return def.promise();
 		};
+			
+		self.customerUrl = ko.computed(function(){
+			var host = String(self.url()).lastIndexOf('api/');
+			host = String(self.url()).substring(0,host);
+			return host + self.shorturl();
+		});
 		
 		self.allAttrs = ko.computed(function(){
 			self.invoice_date();

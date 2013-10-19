@@ -10,11 +10,13 @@
 {% endblock css %}
 
 {% block header %}
-<header data-bind="visible: displayMode() === 'invoice-detail'" style="display: none;">
-	<span class="pull-left"><i class="icon-level-up icon-3x icon-rotate-270"></i></span>
-	<h3 class="status complete">Created</h3>
-	<h3 class="status inprocess">Sent</h3>
-	<h3 class="status inprocess">$Paid$</h3>
+<header data-bind="visible: currentInvoice" style="display: none;">
+	<!-- ko with: currentInvoice -->
+	<span class="pull-left offset1"><i class="icon-level-up icon-3x icon-rotate-270"></i></span>
+	<h3 class="status" data-bind="css: {complete: invoice_date() !== null}">Created</h3>
+	<h3 class="status" data-bind="css: {complete: sent_date() !== null, inprocess: sent_date() === null}">Sent</h3>
+	<h3 class="status" data-bind="css: {complete: paid_date() !== null, inprocess: paid_date() === null}">$Paid$</h3>
+	<!-- /ko -->
 </header>
 {% endblock header %}
 
@@ -253,15 +255,20 @@
 
 <script type="text/html" id="invoice-detail">
 	<div class="invoice-body" data-bind="with: currentInvoice">
-		<div class="row-fluid">
-			<div class="pull-right invoice-id" data-bind="text: pk"></div>
+		<div class="row-fluid" style="padding-bottom: 10px">
+			<div class="pull-right">
+				<div class="invoice-id" data-bind="text: pk"></div>
+				<div class="" data-bind="text: 'Invoice Date: ' + moment(invoice_date()).format('MM/DD/YYYY')"></div>
+			</div>
 		</div>
 	<form id="lineitem-form">
 		<div class="row-fluid">
 			<div class="span3 sender address">
-				<p>Mark
-				<br>123 Main St
-				<br>Anytown, USA 12345</p>
+				<p>Mark Ellis Landscaping
+				<br>PO BOX 2272
+				<br>Fort Bragg, CA 95437
+				<br>(707) 964-7260
+				</p>
 			</div>
 			<div class="span3 pull-right recipient address">
 				<div data-bind="text: full_name"></div>
@@ -271,8 +278,9 @@
 				<br>
 			</div>
 		</div>
-		<div class="row-fluid">
-			<div class="span7 offset1 invoice-heading">Invoice header, status, etc</div>
+		<div class="row-fluid" style="text-align: center">
+			<div class="invoice-heading">You may view your invoice online at <span data-bind="text: customerUrl"></span></div>
+			<div class="invoice-heading">Please remit payment by <span data-bind="text: moment(invoice_date()).add('days', 30).format('MM/DD/YYYY')"></span></div>
 		</div>
 		<table id="lineitem-list" class="table">
 			<thead>
@@ -298,6 +306,7 @@
 		</table>
 	</form>
 	<hr>
+	<div style="text-align:center;">Thank you for your business!</div>
 	<div class="totalbox">
 		<p class="totalLabel">Sub Total: <span class="total currency" data-bind="text: sub_total"></span></p>
 		<p class="totalLabel">Tax: <span class="total currency" data-bind="text: total_tax"></span> </p>

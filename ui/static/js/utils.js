@@ -11,8 +11,11 @@ var Utilities = (function($){
 				xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
 			}
 		}).done(function(data){
-			$(".navbar-inner li.dropdown").text(data.first_name);
+			// var text = (data.first_name) ? data.first_name : data.username;
+			// $(".navbar-inner a.dropdown-toggle").html(text + ' <strong class="caret"></strong>');
+			// $(".navbar-inner div.dropdown-menu").html('<div><span>Settings <i class="icon-cog"></i></span> <br/></div><div><a href="/logout/" class="btn btn-warning">Sign Out</a></div>');
 			def.resolve();
+			location.reload();
 		});
 		return def.promise();
 	},

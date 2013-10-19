@@ -14,7 +14,7 @@ class LandingPageView(TemplateView):
 
 
 class InvoiceDetailView(TemplateView):
-	template_name = 'ui/invoice_detail.html'
+	template_name = 'ui/invoice.html'
 
 
 class CustomerView(TemplateView):

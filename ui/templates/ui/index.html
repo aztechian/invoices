@@ -16,39 +16,14 @@
 	<h1>Invoicing</h1>
 	<p>Lets all get paid!</p>
 	<p>
-		<a class="btn btn-large btn-primary" href="/invoice/add">Get Started!<br></a>
+		<a class="btn btn-large btn-primary" href="/invoices/">Get Started!<br></a>
 	</p>
 </div>
 <h1>Recent Invoices</h1>
-{% if latest_invoice_list %}
-	<table class="table table-bordered table-hover">
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Invoice</th>
-				<th>Amount</th>
-				<th>Paid?</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for invoice in latest_invoice_list %}
-			<tr id={{ invoice.pk }}>
-				<td id=id_{{ invoice.pk }}>{{ invoice.pk }}</td>
-				<td>{{ invoice.customer }}</td>
-				<td>${{ invoice.grand_total }}</td>
-				<td>
-					<i class={%if invoice.is_paid %} "icon-ok-sign"{% else %}
-					"icon-thumbs-down"{% endif %}
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-{% else %}
+
 	<p>No invoices are available. You should
-		<a href="/invoice/add">create one.</a>
+		<a href="/invoices/">create one.</a>
 	</p>
-{% endif %}
 {% endblock main-content %}
 
 {% block javascript %}
