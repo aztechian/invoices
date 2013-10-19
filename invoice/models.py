@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.db import models
 from decimal import Decimal, ROUND_HALF_UP
-from customer.models import Customer
 from django.contrib.auth.models import User
-from django_localflavor_us.us_states import STATE_CHOICES
 from django_localflavor_us.models import USPostalCodeField, PhoneNumberField
-import math, time, datetime
+import math
+import time
+import datetime
+
 
 class Invoice(models.Model):
 	invoice_date = models.DateTimeField(auto_now_add=True)
@@ -25,7 +26,7 @@ class Invoice(models.Model):
 	zip_code = models.CharField(max_length=10, verbose_name="Zip Code")
 	email = models.CharField(max_length=65, editable=False)
 	phone = PhoneNumberField()
-	
+
 
 	def __unicode__(self):
 		return "%s #%d (%s)" % (self.customer.get_full_name(), self.pk, self.shorturl)
@@ -55,7 +56,7 @@ class Invoice(models.Model):
 		for li in self.lineitems.all():
 			if li.taxable:
 				total += Decimal(li.unit_price * li.quantity)
-		total = total * inv_tax_rate;
+		total = total * inv_tax_rate
 		return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 	def _get_sub_total(self):
@@ -81,9 +82,9 @@ class Invoice(models.Model):
 		#list of randomized, url-safe, unambiguous chars
 		charList = 'x5d8j9A3BmCZDsEtFGwHpJuKLaMkNzPQnS6TvUhV2WfX4cYb7egiqRry'
 		if num > 56:
-			return self.num_to_base56(math.floor(int(num)/56)) + charList[int(num) % 56];
+			return self.num_to_base56(math.floor(int(num)/56)) + charList[int(num) % 56]
 		else:
-			return charList[int(num)];
+			return charList[int(num)]
 
 	def save(self, force_insert=False, force_update=False):
 		if self.shorturl is None or self.shorturl == '':
@@ -92,7 +93,7 @@ class Invoice(models.Model):
 			while len(urlStr) < 5:
 				urlStr = self.num_to_base56('0') + urlStr
 			self.shorturl = urlStr
-		
+
 		if self.pk is None:
 			linked_customer = self.customer
 			self.first_name = linked_customer.first_name
@@ -105,4 +106,3 @@ class Invoice(models.Model):
 			self.phone = linked_customer.phone
 			self.email = linked_customer.email
 		super(Invoice, self).save(force_insert, force_update)
-

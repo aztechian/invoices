@@ -81,6 +81,12 @@ var invoice = (function($) {
 			});
 			return def.promise();
 		};
+			
+		self.customerUrl = ko.computed(function(){
+			var host = String(self.url()).lastIndexOf('api/');
+			host = String(self.url()).substring(0,host);
+			return host + self.shorturl();
+		});
 		
 		self.allAttrs = ko.computed(function(){
 			self.invoice_date();
@@ -173,13 +179,16 @@ var invoice = (function($) {
 		var def = $.Deferred(),
 		postPayload = {
 			customer: customer,
-			owner: "http://invoices.aztechian.c9.io/api/users/1/"
+			owner: "http://invoices-c9-aztechian.c9.io/api/users/1/"
 		};
 		$.ajax({
 			url: "/api/invoices/",
 			contentType: "application/json; charset=UTF-8",
 			data: JSON.stringify(postPayload),
-			type: "POST"
+			type: "POST",
+			beforeSend: function(xhr, settings){
+				xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
+			}
 		}).done(function(data){
 			var newInvoice = new InvoiceViewModel(data);
 			invoiceList.push(newInvoice);
@@ -199,7 +208,10 @@ var invoice = (function($) {
 		$.ajax({
 			url: invoice.url(),
 			contentType: "application/json; charset=UTF-8",
-			type: "DELETE"
+			type: "DELETE",
+			beforeSend: function(xhr, settings){
+				xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
+			}
 		}).done(function(data){
 			invoiceList.remove(invoice);
 			def.resolve();
