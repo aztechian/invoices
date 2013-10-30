@@ -14,3 +14,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 	def pre_save(self, obj):
 		obj.owner = self.request.user
 
+	def get_queryset(self):
+		user = self.request.user
+		return Invoice.objects.filter(owner=user)
+

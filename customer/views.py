@@ -10,6 +10,10 @@ class CustomerViewSet(ModelViewSet):
 	permission_classes = (permissions.IsAuthenticated,)
 	filter_backends = (filters.SearchFilter,)
 	search_fields = ('first_name', 'last_name', 'username', 'street1', 'street2', 'city', 'zip_code')
+	
+	def get_queryset(self):
+		user = self.request.user
+		return Customer.objects.filter(owner=user)
 
 class PermissionViewSet(ModelViewSet):
 	serializer_class = PermissionSerializer

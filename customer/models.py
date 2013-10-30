@@ -11,3 +11,5 @@ class Customer(User):
 	state = USPostalCodeField(blank=True)
 	zip_code = models.CharField(max_length=10, verbose_name="Zip Code")
 	phone = PhoneNumberField()
+	owner = models.ForeignKey('self', null=False)
+

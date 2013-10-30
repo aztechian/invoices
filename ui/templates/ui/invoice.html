@@ -6,7 +6,8 @@
 {% block css %}
 	{{block.super}}
 	<link rel="stylesheet" href="{% static 'css/invoice.css' %}" type="text/css" />
-	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.1/select2.min.css" type="text/css" />
+	<link rel="stylesheet" href="{% static 'css/select2.css' %}" type="text/css" />
+	<link rel="stylesheet" href="{% static 'css/select2-bootstrap.css' %}" type="text/css" />
 {% endblock css %}
 
 {% block header %}
@@ -44,7 +45,7 @@
 
 {% block javascript %}
 	{{ block.super }}
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.1/select2.min.js"></script>
+	<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
 	<script type="text/javascript" src="{% static 'js/knockout.x-editable.js' %}"></script>

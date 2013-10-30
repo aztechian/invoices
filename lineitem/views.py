@@ -8,4 +8,7 @@ class LineItemViewSet(viewsets.ModelViewSet):
 	model = LineItem
 	permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+	def get_queryset(self):
+		user = self.request.user
+		return LineItem.objects.filter(invoice__owner=user)
 
