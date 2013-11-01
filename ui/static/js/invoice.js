@@ -11,7 +11,7 @@ var invoice = (function($) {
 		var self = this;
 		
 		self.lineitems = ko.observableArray();
-		// self.lineitemObjs = ko.observableArray();
+		
 		self.loadData(serverData);
 		self.pk = ko.computed(function(){
 			if( self.url() === "" || self.url() === undefined )
@@ -170,7 +170,6 @@ var invoice = (function($) {
 			self.lineitems.removeAll();
 			$.each(serverData.lineitems, function(i,v){
 				self.lineitems.push(new lineitem.LineItemViewModel({url: v, invoice: self.url()}));
-				// self.lineitems.push(v);
 			});
 		}
 	};
@@ -179,7 +178,7 @@ var invoice = (function($) {
 		var def = $.Deferred(),
 		postPayload = {
 			customer: customer,
-			owner: "http://invoices-c9-aztechian.c9.io/api/users/1/"
+			//owner: "http://invoices-c9-aztechian.c9.io/api/users/1/"
 		};
 		$.ajax({
 			url: "/api/invoices/",
@@ -225,11 +224,10 @@ var invoice = (function($) {
 
 	init = function() {
 		$.getJSON("/api/invoices/", function(data){
-			$.each(data, function(i, val){
+			$.each(data.results, function(i, val){
 				var inv = new InvoiceViewModel(val);
 				invoiceList.push(inv);
 			});
-			$("#loading").hide();
 			displayMode('invoice-list');
 		});
 	},

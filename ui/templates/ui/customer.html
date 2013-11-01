@@ -5,7 +5,7 @@
 
 {% block css %}
 	{{ block.super }}
-	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.0/select2.css" type="text/css" />
+	<link rel="stylesheet" href="{% static 'css/select2.css' %}" type="text/css" />
 	<link rel="stylesheet" href="{% static 'css/invoice.css' %}" type="text/css" />
 {% endblock css %}
 
@@ -63,16 +63,7 @@
 				<input type="text" name="street1" placeholder="Address 1" data-bind="value: street1">
 				<input type="text" name="street2" placeholder="Address 2" data-bind="value: street2">
 				<input type="text" name="city" placeholder="City" data-bind="value: city">
-				<select>
-					<option value="AL">Alabama</option>
-					<option value="AK">Alaska</option>
-					<option value="AS">American Samoa</option>
-					<option value="AZ">Arizona</option>
-					<option value="AR">Arkansas</option>
-					<option value="CA">California</option>
-					<option value="CO">Colorado</option>
-				</select>
-				<!--<input type="text" name="state" placeholder="State" data-bind="value: state">-->
+				<select class="input-medium" placeholder="State" data-bind="options: $parent.states, optionsValue: 'id', optionsText: 'text', value: state">
 				<input type="text" name="zip_code" placeholder="Zip Code" data-bind="value: zip_code">
 			</div>
 			<div class="container-fluid span4">
@@ -96,7 +87,7 @@
 
 {% block javascript %}
 	{{ block.super }}
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.0/select2.min.js"></script>
+	<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
 	<script type="text/javascript" src="{% static 'js/customer.js' %}"></script>
 	<script type="text/javascript">
@@ -115,38 +106,20 @@
 		$(document).on('click', 'button.customer_save', function(event){
 			//is this a new record?
 			var boundObject = ko.dataFor(this);
-			boundObject.date_joined(new Date().toISOString())
-			var toSubmit = ko.toJS(boundObject);
-			delete toSubmit.formatted_phone;
-			delete toSubmit.oneline_address;
-			delete toSubmit.full_name;
-			if( boundObject.pk() <= 0 ) {
-				$.ajax({
-					url: '/api/customers/',
-					dataType: 'json',
-					data: JSON.stringify(toSubmit),
-					type: 'POST',
-					beforeSend: function(xhr, settings){
-						xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
-					},
-					contentType: 'application/json; charset=UTF-8'
-				}).done(function(data, textStatus, jqXhr){
-					var tempPk = parseInt(data.url.split('/').slice(-2,-1)[0], 10);
-					boundObject.pk(tempPk);
-					boundObject.date_joined(data.date_joined);
-					$(event.target).closest(".detail-box").hide('fast');
-					$(event.target).closest(".expanded-info").removeClass("expanded-info");
-				}).fail(function(jqXhr, textStatus, errorThrown){
-					$(event.target).closest(".detail-box").find("input").css("border-color", '');
-					if( jqXhr.status === 400 ){
-						var badFields = jqXhr.responseJSON,
-						detailBox = $(event.target).closest('.detail-box');
-						$.each(badFields, function(i, v){
-							detailBox.find("input[name="+i+"]").css("border-color", "red");
-						});
-					}
-				});
-			}
+			boundObject.date_joined(new Date().toISOString());
+			boundObject.save().done(function(data){
+				$(event.target).closest(".detail-box").hide('fast');
+				$(event.target).closest(".expanded-info").removeClass("expanded-info");
+			}).fail(function(jqXhr, statusText, status){
+				$(event.target).closest(".detail-box").find("input").css("border-color", '');
+				if( jqXhr.status === 400 ){
+					var badFields = jqXhr.responseJSON,
+					detailBox = $(event.target).closest('.detail-box');
+					$.each(badFields, function(i, v){
+						detailBox.find("input[name="+i+"]").css("border-color", "red");
+					});
+				}
+			});
 			event.preventDefault();
 			event.stopPropagation();
 			return false;

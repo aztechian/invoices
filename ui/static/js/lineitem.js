@@ -53,10 +53,7 @@ var LineItem = (function($){
 		}).extend( { throttle: 500 });
 		
 		self.allAttrs.subscribe(function(){
-			var promise = self.save();
-			promise.done(function(data){
-				
-			});
+			return self.save();
 		});
 	};
 	

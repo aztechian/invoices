@@ -11,6 +11,9 @@ class CustomerViewSet(ModelViewSet):
 	filter_backends = (filters.SearchFilter,)
 	search_fields = ('first_name', 'last_name', 'username', 'street1', 'street2', 'city', 'zip_code')
 	
+	def pre_save(self, obj):
+		obj.owner = self.request.user
+	
 	def get_queryset(self):
 		user = self.request.user
 		return Customer.objects.filter(owner=user)

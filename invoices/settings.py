@@ -111,7 +111,10 @@ LOGIN_REDIRECT_URL = 'ui:ui-index'
 USE_X_FORWARDED_HOST = True
 
 REST_FRAMEWORK = {
-	'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.SessionAuthentication',)
+	'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.SessionAuthentication',),
+	'PAGINATE_BY': 20,                 # Default to 10
+	'PAGINATE_BY_PARAM': 'page_size',  # Allow client to override, using `?page_size=xxx`.
+	'MAX_PAGINATE_BY': 100             # Maximum limit allowed when using `?page_size=xxx`.
 }
 
 # Python dotted path to the WSGI application used by Django's runserver.

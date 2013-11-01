@@ -23,16 +23,16 @@
 
 {% block sidenav %}
 	<ul class="nav nav-pills nav-stacked">
-		<li class="active">
+		<li class="active" id="all-invoices">
 			<a href="#">All</a>
 		</li>
-		<li>
+		<li id="unpaid-invoices">
 			<a href="#">Unpaid</a>
 		</li>
-		<li>
+		<li id="unsent-invoices">
 			<a href="#">Unsent</a>
 		</li>
-		<li>
+		<li id="recent-invoices">
 			<a href="#">Recent</a>
 		</li>
 	</ul>
@@ -90,49 +90,38 @@
 
 	$().ready(function() {
 		$("#lineitem-list a").editable();
-
-		// var newrow = $(document.getElementById("templates").innerHTML);
-		// var $newrow = newrow.clone();
-		// $newrow.attr('id', 'newlineitem').css('background', '#FAFAE6');
-		// var currRowCount = $('#lineitem-list tbody')[0].rows.length;
-		// $newrow.children('td:first').html(currRowCount); //it already be +1 because of the template row
-		// $('#lineitem-list tbody').append($newrow);
-		// $newrow.find('a').editable();
-		// $newrow.show('slow', function() {
-		// $newrow.css('background', '');
-		// });
-
-		// $('.recipient').editable({
-		//   value: {
-		//     full_name: 'Customer One',
-		//     address1: '1234 Main St',
-		//     address2: '',
-		//     city: 'Anytown',
-		//     state: 'NE',
-		//     zip: '62932'
-		//   },
-		//   validate: function(value){
-		//     if( value.address1 === '' )
-		//       return 'Address is required';
-		//     if( value.city === '' )
-		//       return 'City is required';
-		//     if( value.state === '' )
-		//       return 'State is required';
-		//     if( value.zip === '' )
-		//       return 'Zip code is required';
-		//     if( ! /(^\d{5}$)|(^\d{5}-\d{4}$)/.test(value.zip) )
-		//       return 'Zip code in invalid format';
-		//   },
-		//   display: function(value){
-		//     if( !value ){
-		//       $(this).empty();
-		//       return;
-		//     }
-		//     var thehtml = '<p>' + value.full_name + "<br>" + value.address1 + "<br>" + value.address2 + "<br>" + value.city + ", " + value.state + " " + value.zip + "</p>";
-		//     $(this).html(thehtml);
-		//   }
-		// });
-		// });
+	});
+	
+	$(document).on('click', 'ul.nav-stacked li', function(event){
+		var $targ = $(event.currentTarget),
+		params = {};
+		$('ul.nav-stacked li').removeClass('active');
+		if( $targ.attr('id') === 'unpaid-invoices' ){
+			params.paid = false;
+		}
+		if( $targ.attr('id') === 'unsent-invoices' ){
+			params.sent = false;
+		}
+		if( $targ.attr('id') === 'recent-invoices' ){
+			params.recent = true;
+		}
+		if( $targ.attr('id') === 'all-invoices' ){
+			params = undefined;
+		}
+		invoice.setInvoice();
+		invoice.invoiceList.removeAll();
+		$.getJSON("/api/invoices/", params, function(data){
+			$.each(data.results, function(i, val){
+				var inv = new invoice.InvoiceViewModel(val);
+				invoice.invoiceList.push(inv);
+			});
+			invoice.displayMode('invoice-list');
+			$targ.closest('li').addClass('active');
+		});
+		
+		event.stopPropagation();
+		event.preventDefault();
+		return false;
 	});
 
 	$(document).on('hidden', '#lineitem-list span', function(e, reason) {
@@ -179,7 +168,7 @@
 				},
 				results: function(data, page){
 					var arr = [];
-					$.each(data, function(i,v){
+					$.each(data.results, function(i,v){
 						arr.push({ id: v.url, text: v.first_name + " " + v.last_name });
 					});
 					return { results: arr };
