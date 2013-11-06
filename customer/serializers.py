@@ -5,6 +5,7 @@ from customer.models import Customer
 class CustomerSerializer(HyperlinkedModelSerializer):
 	class Meta:
 		model = Customer
+		read_only_fields = ('owner',)
 
 class PermissionSerializer(ModelSerializer):
 	class Meta:
