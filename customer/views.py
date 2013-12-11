@@ -12,10 +12,10 @@ class CustomerViewSet(ModelViewSet):
 	search_fields = ('first_name', 'last_name', 'username', 'street1', 'street2', 'city', 'zip_code')
 	
 	def pre_save(self, obj):
-		obj.owner = self.request.user
+		obj.owner = self.request.user.customer
 	
 	def get_queryset(self):
-		user = self.request.user
+		user = self.request.user.customer
 		return Customer.objects.filter(owner=user)
 
 class PermissionViewSet(ModelViewSet):

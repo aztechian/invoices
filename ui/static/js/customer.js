@@ -162,10 +162,10 @@ var customer = (function($) {
 		def = $.Deferred();
 		
 		$.ajax({
-			url: self.url(),
+			url: (self.url()) ? self.url() : base_api,
 			contentType: "application/json; charset=UTF-8",
 			data: ko.toJSON(self),
-			type: 'PUT',
+			type: (self.pk() > 0) ? 'PUT' : 'POST',
 			beforeSend: function(xhr, settings){
 				xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
 			}
