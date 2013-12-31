@@ -10,3 +10,4 @@ local_settings.py
 .c9*
 *env/
 secret_key.py
+staticfiles
