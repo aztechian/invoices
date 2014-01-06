@@ -5,15 +5,15 @@
 
 {% block css %}
 	{{block.super}}
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.4/select2.css" type="text/css" />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.4/select2-bootstrap.css" type="text/css" />
 	<link rel="stylesheet" href="{% static 'css/invoice.css' %}" type="text/css" />
-	<link rel="stylesheet" href="{% static 'css/select2.css' %}" type="text/css" />
-	<link rel="stylesheet" href="{% static 'css/select2-bootstrap.css' %}" type="text/css" />
 {% endblock css %}
 
 {% block header %}
 <header data-bind="visible: currentInvoice" style="display: none;">
 	<!-- ko with: currentInvoice -->
-	<span class="pull-left offset1"><i class="icon-level-up icon-3x icon-rotate-270"></i></span>
+	<span class="pull-left offset1"><i class="fa fa-level-up fa-3x fa-rotate-270"></i></span>
 	<h3 class="status" data-bind="css: {complete: invoice_date() !== null}">Created</h3>
 	<h3 class="status" data-bind="css: {complete: sent_date() !== null, inprocess: sent_date() === null}">Sent</h3>
 	<h3 class="status" data-bind="css: {complete: paid_date() !== null, inprocess: paid_date() === null}">$Paid$</h3>
@@ -45,7 +45,7 @@
 
 {% block javascript %}
 	{{ block.super }}
-	<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.4/select2.min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
 	<script type="text/javascript" src="{% static 'js/knockout.x-editable.js' %}"></script>
@@ -138,7 +138,7 @@
 		invoice.setInvoice(ko.dataFor(this));
 	});
 
-	$(document).on('click', '#done-btn, i.icon-level-up', function(event){
+	$(document).on('click', '#done-btn, i.fa-level-up', function(event){
 		returnFromDetail();
 	});
 
@@ -340,15 +340,15 @@
 				<td data-bind="text: moment(invoice_date()).format('MM/DD/YYYY')"></td>
 				<td class="currency" data-bind="text: cached_grand_total"></td>
 				<td>
-					<i id="sent-icon" data-bind="attr: {class: (sent_date() === null) ? 'icon-check-empty' : 'icon-check'}"></i>
+					<i id="sent-icon" class="fa" data-bind="css: (sent_date() === null) ? 'fa-square-o' : 'fa-check-square-o'"></i>
 				</td>
 				<td>
-					<i id="paid-icon" data-bind="attr: {class: (paid_date() === null) ? 'icon-check-empty' : 'icon-check'}"></i>
+					<i id="paid-icon" class="fa" data-bind="css: (paid_date() === null) ? 'fa-square-o' : 'fa-check-square-o'"></i>
 				</td>
 			</tr>
 		</tbody>
 	</table>
-	<a href="#" id="new-invoice"><i style="padding-top: 8px;" class="icon-plus-sign icon-large pull-left"> Add Invoice</i></a>
+	<a href="#" id="new-invoice"><i style="padding-top: 8px;" class="fa fa-plus-circle pull-left"> Add Invoice</i></a>
 
 <div id="customer_chooser" class="modal hide fade">
 	<div class="modal-header">
@@ -368,7 +368,7 @@
 </script>
 
 <script type="text/html" id="loading">
-	<div id="loading" style="text-align: center"><h1>Loading <i class="icon-spinner icon-spin"></i></h1></div>
+	<div id="loading" style="text-align: center"><h1>Loading <i class="fa fa-spinner fa-spin"></i></h1></div>
 </script>
 
 <script type="text/html" id="alert-template">

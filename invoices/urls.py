@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from lineitem.views import LineItemViewSet
 from invoice.views import InvoiceViewSet
-from customer.views import CustomerViewSet, PermissionViewSet, UserViewSet
+from customer.views import CustomerViewSet, PermissionViewSet, UserViewSet, USStateList
 
 router = DefaultRouter()
 router.register(r'lineitems', LineItemViewSet)
@@ -11,6 +11,7 @@ router.register(r'invoices', InvoiceViewSet)
 router.register(r'customers', CustomerViewSet)
 router.register(r'permissions', PermissionViewSet)
 router.register(r'users', UserViewSet)
+router.register(r'states', USStateList, base_name='states')
 
 urlpatterns = patterns('',
 	url(r'^api/', include(router.urls)),

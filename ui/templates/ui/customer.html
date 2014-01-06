@@ -5,7 +5,8 @@
 
 {% block css %}
 	{{ block.super }}
-	<link rel="stylesheet" href="{% static 'css/select2.css' %}" type="text/css" />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.4/select2.css" type="text/css" />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.4/select2-bootstrap.css" type="text/css" />
 	<link rel="stylesheet" href="{% static 'css/invoice.css' %}" type="text/css" />
 {% endblock css %}
 
@@ -23,7 +24,7 @@
 
 {% block main-content %}
 <h1 style="display: inline-block">Customer List</h1>
-<i style="display: inline-block" class="icon-spinner icon-2x icon-spin"></i>
+<i style="display: inline-block" class="fa fa-spinner fa-2x fa-spin"></i>
 <div id="customer_table" class="row-fluid">
 	<div class="customer_thead row-fluid">
 		<div class="container-fluid span1 th">
@@ -45,7 +46,7 @@
 	<!-- ko foreach: customerList -->
 	<div class="customer_tr row-fluid">
 		<div class="row-fluid">
-			<div class="container-fluid span1"><i class="customer_action icon-remove-circle" data-title="Delete Contact"></i><span class="label hide">Saved</span></div>
+			<div class="container-fluid span1"><i class="customer_action fa fa-times-circle" data-title="Delete Contact"></i><span class="label hide">Saved</span></div>
 			<div class="container-fluid span2" data-bind="text: full_name"></div>
 			<div class="container-fluid span3" data-bind="text: oneline_address"></div>
 			<div class="container-fluid span2" data-bind="text: email"></div>
@@ -63,7 +64,7 @@
 				<input type="text" name="street1" placeholder="Address 1" data-bind="value: street1">
 				<input type="text" name="street2" placeholder="Address 2" data-bind="value: street2">
 				<input type="text" name="city" placeholder="City" data-bind="value: city">
-				<select class="input-medium" placeholder="State" data-bind="options: $parent.states, optionsValue: 'id', optionsText: 'text', value: state">
+				<select type="select2" class="input-medium" placeholder="State" data-bind="options: $parent.states, optionsValue: 'id', optionsText: 'text', value: state">
 				<input type="text" name="zip_code" placeholder="Zip Code" data-bind="value: zip_code">
 			</div>
 			<div class="container-fluid span4">
@@ -82,22 +83,28 @@
 	</div>
 	<!-- /ko -->
 </div>
-<a href="#"><i style="padding-top: 8px;" class="icon-plus-sign icon-large pull-left"> Add Customer</i></a>
+<a href="#"><i style="padding-top: 8px;" class="fa fa-plus-circle pull-left"> Add Customer</i></a>
 {% endblock main-content %}
 
 {% block javascript %}
 	{{ block.super }}
-	<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.4/select2.min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.0.0/knockout-min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"></script>
 	<script type="text/javascript" src="{% static 'js/customer.js' %}"></script>
 	<script type="text/javascript">
-		/*global ko, customer, $ */
+		/*global ko, Customer, $ */
 		
 		$('#nav_customers').addClass('active');
-		ko.applyBindings(customer, $("table")[0]);
 		
-		$(document).on('click', 'i.icon-plus-sign', function(event){
-			customer.addCustomer();
+		Customer.init().done(function(){
+			$('i.fa-spinner').hide();
+		}).always(function(){
+			ko.applyBindings(Customer, $("table")[0]);
+		});
+		
+		$(document).on('click', 'i.fa-plus-circle', function(event){
+			Customer.addCustomer();
 			$('#customer_table').find(".customer_tr:last").trigger('click');
 			event.preventDefault();
 			event.stopPropagation();
@@ -146,7 +153,7 @@
 			event.stopPropagation();
 		});
 		
-		$(document).on('click', ".customer_tr .customer_action.icon-remove-circle", function(event){
+		$(document).on('click', ".customer_tr .customer_action.fa-times-circle", function(event){
 			var theCustomer = ko.dataFor(this);
 			alert("Really delete " + theCustomer.full_name() + "?\nYou may consider simply deactivating them instead.");
 			event.preventDefault();
@@ -154,7 +161,7 @@
 			return false;
 		});
 		
-		$(document).ready(function() {
+		$(function() {
 			setTimeout(function() {
 				$(".customer_action").tooltip();
 				$(".detail-box select").select2();

@@ -71,7 +71,10 @@ var invoice = (function($) {
 				url: self.url(),
 				contentType: "application/json; charset=UTF-8",
 				data: ko.toJSON(self),
-				type: "PUT"
+				type: "PUT",
+				beforeSend: function(xhr, settings){
+					xhr.setRequestHeader("X-CSRFToken", utils.getCookie('csrftoken'));
+				}
 			}).done(function(data){
 				console.log("Saved.");
 				def.resolve();
