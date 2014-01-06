@@ -1,11 +1,13 @@
 # Django settings for invoices project.
 
+import os
+from django.utils.crypto import get_random_string
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 TAX_RATE = "1.0675"
 
 ADMINS = (
-    ('Ian Martin', 'ian@imartin.net'),
 )
 
 MANAGERS = ADMINS
@@ -13,7 +15,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'invoices.db',                      # Or path to database file if using sqlite3.
+        'NAME': os.path.join(os.path.abspath(os.path.dirname(__file__)), os.pardir, 'invoices.db'),                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -84,8 +86,8 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'wbtwzd3k4c@&82i=u!09f6-r4ckb!=j#=hu$iayidic#$-zq^5'
+# Dynamically set at the bottom of this file. Created if doesn't exist
+#SECRET_KEY = ''
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -95,7 +97,6 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-	'invoices.c9ProxyMiddleware.c9ProxyMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -172,3 +173,14 @@ LOGGING = {
         },
     }
 }
+
+try:
+	from secret_key import *
+except:
+	sk = open(os.path.dirname(__file__) + os.sep +  "secret_key.py", 'w')
+	chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+	k = get_random_string(50, chars)
+	sk.write("SECRET_KEY = '%s'" % k)
+	sk.close()
+	from secret_key import *
+
