@@ -3,12 +3,13 @@ from rest_framework.routers import DefaultRouter
 
 from lineitem.views import LineItemViewSet
 from invoice.views import InvoiceViewSet
-from customer.views import CustomerViewSet, PermissionViewSet, UserViewSet, USStateList
+from customer.views import CustomerViewSet, PermissionViewSet, UserViewSet, USStateList, AddressViewSet
 
 router = DefaultRouter()
 router.register(r'lineitems', LineItemViewSet)
 router.register(r'invoices', InvoiceViewSet)
 router.register(r'customers', CustomerViewSet)
+router.register(r'addresses', AddressViewSet)
 router.register(r'permissions', PermissionViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'states', USStateList, base_name='states')

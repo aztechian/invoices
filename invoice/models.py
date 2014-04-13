@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.models import User
-from django_localflavor_us.models import USPostalCodeField, PhoneNumberField
+from localflavor.us.models import USPostalCodeField, PhoneNumberField
 import math
 import time
 import datetime
@@ -19,11 +19,16 @@ class Invoice(models.Model):
 	# If the customers' info changes in the future, we don't want all old invoices to update too
 	first_name = models.CharField(max_length=30, blank=True, null=True)
 	last_name = models.CharField(max_length=30, blank=True, null=True)
-	street1 = models.CharField(max_length=60, verbose_name="Address 1", editable=False)
-	street2 = models.CharField(max_length=60, blank=True, verbose_name="Address 2", editable=False)
-	city = models.CharField(max_length=30, editable=False)
-	state = USPostalCodeField()
-	zip_code = models.CharField(max_length=10, verbose_name="Zip Code")
+	service_street1 = models.CharField(max_length=60, verbose_name="Address 1", editable=False)
+	service_street2 = models.CharField(max_length=60, blank=True, verbose_name="Address 2", editable=False)
+	service_city = models.CharField(max_length=30, editable=False)
+	service_state = USPostalCodeField()
+	service_zip_code = models.CharField(max_length=10, verbose_name="Zip Code")
+	billing_street1 = models.CharField(max_length=60, verbose_name="Address 1", editable=False)
+	billing_street2 = models.CharField(max_length=60, blank=True, verbose_name="Address 2", editable=False)
+	billing_city = models.CharField(max_length=30, editable=False)
+	billing_state = USPostalCodeField()
+	billing_zip_code = models.CharField(max_length=10, verbose_name="Zip Code")
 	email = models.CharField(max_length=65, editable=False)
 	phone = PhoneNumberField()
 
@@ -98,11 +103,17 @@ class Invoice(models.Model):
 			linked_customer = self.customer
 			self.first_name = linked_customer.first_name
 			self.last_name = linked_customer.last_name
-			self.street1 = linked_customer.street1
-			self.street2 = linked_customer.street2
-			self.city = linked_customer.city
-			self.state = linked_customer.state
-			self.zip_code = linked_customer.zip_code
+			self.billing_street1 = linked_customer.street1
+			self.billing_street2 = linked_customer.street2
+			self.billing_city = linked_customer.city
+			self.billing_state = linked_customer.state
+			self.billing_zip_code = linked_customer.zip_code
+			#just make service the same as billing to start
+			self.service_street1 = linked_customer.street1
+			self.service_street2 = linked_customer.street2
+			self.service_city = linked_customer.city
+			self.service_state = linked_customer.state
+			self.service_zip_code = linked_customer.zip_code
 			self.phone = linked_customer.phone
 			self.email = linked_customer.email
 		super(Invoice, self).save(force_insert, force_update)

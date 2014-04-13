@@ -11,4 +11,4 @@ class InvoiceSerializer(HyperlinkedModelSerializer):
 
 	class Meta:
 		model = Invoice
-		read_only_fields = ('owner','first_name','last_name','street1','street2','state','zip_code','phone','email')
+		read_only_fields = ('owner','first_name','last_name','service_street1','service_street2','service_state','service_zip_code', 'billing_street1','billing_street2','billing_state','billing_zip_code','phone','email')
